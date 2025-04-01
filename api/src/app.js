@@ -53,6 +53,47 @@ app.get("/boxes/:box_id/items", async (req, res) => {
   }
 });
 
+app.post("/register", async (req, res) => {
+  const { user_name, email, street, house_number, postal_code, city, country } =
+    req.body;
+  try {
+    if (
+      !user_name ||
+      !email ||
+      !street ||
+      !house_number ||
+      !postal_code ||
+      !city ||
+      !country
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Please fill in the form completely to register" });
+    }
+    const data = await db.select().from("users").where({ email }).first();
+    if (data) {
+      return res.status(400).json({
+        error: "There is already an account using this email address.",
+      });
+    }
+    const newUser = await db("users")
+      .insert({
+        user_name,
+        email,
+        street,
+        house_number,
+        postal_code,
+        city,
+        country,
+      })
+      .returning("*");
+    res.json({ message: "User created successfully", data: newUser });
+  } catch (error) {
+    console.error("Error creating user:", error);
+    res.status(500).json({ error: "Interal server error" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`App listening on port ${port}`);
 });

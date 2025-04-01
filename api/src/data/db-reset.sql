@@ -8,6 +8,7 @@ DROP TABLE IF EXISTS users;
 CREATE TABLE users (
 user_id SERIAL PRIMARY KEY,
 user_name VARCHAR(255),
+email VARCHAR(255),
 street VARCHAR(255),
 house_number VARCHAR(255),
 postal_code VARCHAR(255),
@@ -27,10 +28,10 @@ box_id INT REFERENCES boxes(box_id) ON DELETE CASCADE,
 item_name VARCHAR(255)
 );
 
-INSERT INTO users (user_name, street, house_number, postal_code, city, country) VALUES
-('test_user1', 'Mozartstrasse', '4-10', '53115', 'Bonn', 'Germany'),
-('test_user2', 'Mozartstrasse', '4-10', '53115', 'Bonn', 'Germany'),
-('test_user3', 'Mozartstrasse', '4-10', '53115', 'Bonn', 'Germany');
+INSERT INTO users (user_name, email, street, house_number, postal_code, city, country) VALUES
+('test_user1', 'test1@test.de', 'Mozartstrasse', '4-10', '53115', 'Bonn', 'Germany'),
+('test_user2', 'test2@test.de', 'Mozartstrasse', '4-10', '53115', 'Bonn', 'Germany'),
+('test_user3', 'test3@test.de', 'Mozartstrasse', '4-10', '53115', 'Bonn', 'Germany');
 
 INSERT INTO boxes (user_id, location) VALUES -- enter longitude before latitude
 (1, ST_GeographyFromText('SRID=4326;POINT(7.090183 50.732843)')),
