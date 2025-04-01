@@ -1,34 +1,23 @@
 import "./App.css";
-import { GoogleMap, LoadScript } from "@react-google-maps/api";
+import { MapContainer, Popup, TileLayer, Marker } from "react-leaflet";
 
 function App() {
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-  if (!apiKey) {
-    throw new Error("Google Maps API key is not defined in .env");
-  }
-
-  const mapContainerStyle = {
-    width: "100%",
-    height: "400px",
-  };
-
-  const center = {
-    lat: 50.732791,
-    lng: 7.090617,
-  };
-
   return (
     <>
       <h1>Zusch!</h1>
-      <div className="map">
-        <LoadScript googleMapsApiKey={apiKey}>
-          <GoogleMap
-            mapContainerStyle={mapContainerStyle}
-            center={center}
-            zoom={16}
-          ></GoogleMap>
-        </LoadScript>
-      </div>
+      <MapContainer
+        center={[50.73288, 7.090452]}
+        zoom={16}
+        style={{ height: "400px", width: "100%" }} // height must always be defined
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+        <Marker position={[50.73288, 7.090452]}>
+          <Popup>Taktsoft!</Popup>
+        </Marker>
+      </MapContainer>{" "}
     </>
   );
 }
