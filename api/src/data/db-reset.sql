@@ -1,4 +1,4 @@
---CREATE EXTENSION postgis;
+-- CREATE EXTENSION postgis;
 -- ^this only needs to be run once
 
 DROP TABLE IF EXISTS items;

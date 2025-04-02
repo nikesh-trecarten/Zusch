@@ -2,7 +2,7 @@
 
 This is my Final Project for the Taktsoft Campus Talents Fullstack Developer Bootcamp, Eichhoernchen Group 01-05.2025.
 
-Zusch is an app that makes it easy to give away items you no longer need, or find items that you do need!
+Zusch is an app that makes it easy to give away items you no longer need, or find items that you do need! The name of the app comes from an abbreviation of the German "zu verschenken".
 
 No lengthy back-and-forth, no hassle, no fuss, _einfach zuschen_!
 
