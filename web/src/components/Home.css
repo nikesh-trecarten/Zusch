@@ -1,0 +1,11 @@
+.home {
+  justify-items: center;
+}
+
+.home h3 {
+  text-align: center;
+}
+
+input {
+  width: 200px;
+}
