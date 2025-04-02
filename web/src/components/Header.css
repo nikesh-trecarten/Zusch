@@ -1,0 +1,17 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header h2 {
+  margin: 5px;
+}
+
+.links {
+  display: flex;
+}
+
+h3 {
+  text-align: center;
+}
