@@ -17,42 +17,6 @@ app.get("/", (req, res) => {
   return res.json({ msg: "API is up and running" });
 });
 
-app.get("/users/:user_id", async (req, res) => {
-  try {
-    const { user_id } = req.params;
-    const data = await db.select().from("users").where({ user_id });
-    res.json(data);
-  } catch (error) {
-    console.error("Error fetching user:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-app.get("/boxes/:box_id", async (req, res) => {
-  try {
-    const { box_id } = req.params;
-    const data = await db
-      .select()
-      .from("boxes")
-      .where({ "boxes.box_id": box_id });
-    res.json(data);
-  } catch (error) {
-    console.error("Error fetching box:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-app.get("/boxes/:box_id/items", async (req, res) => {
-  try {
-    const { box_id } = req.params;
-    const data = await db.select().from("items").where({ box_id: box_id });
-    res.json(data);
-  } catch (error) {
-    console.error("Error fetching box:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
 app.post("/register", async (req, res) => {
   const { user_name, email, street, house_number, postal_code, city, country } =
     req.body;
@@ -91,6 +55,123 @@ app.post("/register", async (req, res) => {
   } catch (error) {
     console.error("Error creating user:", error);
     res.status(500).json({ error: "Interal server error" });
+  }
+});
+
+app.post("/login", async (req, res) => {
+  const { email } = req.body;
+  try {
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+    const data = await db.select().from("users").where({ email }).first();
+    if (!data) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.json({ message: "Login successful" });
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/users/", async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    const data = await db.select().from("users");
+    res.json(data);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/users/:user_id", async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    const data = await db.select().from("users").where({ user_id });
+    res.json(data);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/boxes", async (req, res) => {
+  try {
+    const data = await db.select().from("boxes");
+    res.json(data);
+  } catch (error) {
+    console.error("Error fetching boxes:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post("/boxes", async (req, res) => {
+  const { user_id, location } = req.body;
+  try {
+    const result = await db("boxes").insert({
+      user_id: user_id,
+      location,
+    });
+    res.json({ message: "Box placed in map" });
+  } catch (error) {
+    console.error("Error placing box in map:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/boxes/:box_id", async (req, res) => {
+  try {
+    const { box_id } = req.params;
+    const data = await db
+      .select()
+      .from("boxes")
+      .where({ "boxes.box_id": box_id });
+    res.json(data);
+  } catch (error) {
+    console.error("Error fetching box:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/boxes/:box_id/items", async (req, res) => {
+  try {
+    const { box_id } = req.params;
+    const data = await db.select().from("items").where({ box_id: box_id });
+    res.json(data);
+  } catch (error) {
+    console.error("Error fetching box:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/boxes/:box_id/items/:item_id", async (req, res) => {
+  try {
+    const { box_id, item_id } = req.params;
+    const data = await db
+      .select()
+      .from("items")
+      .where({ box_id: box_id, item_id: item_id });
+    res.json(data);
+  } catch (error) {
+    console.error("Error fetching box:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post("/boxes/:box_id/items", async (req, res) => {
+  const { box_id } = req.params;
+  const { item_name } = req.body;
+  try {
+    const result = await db("items").insert({
+      box_id: box_id,
+      item_name,
+    });
+    res.json({ message: "Item added to box:" });
+  } catch (error) {
+    console.error("Error adding item to box:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
