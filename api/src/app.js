@@ -135,6 +135,19 @@ app.get("/boxes/:box_id", async (req, res) => {
   }
 });
 
+app.delete("/boxes", async (req, res) => {
+  const { box_id } = req.body;
+  try {
+    const result = await db("boxes").where({ box_id }).del();
+    if (result === 0) {
+      return res.status(404).json({ error: "Box not found" });
+    }
+    res.json({ message: "Box deleted" });
+  } catch (error) {
+    console.error("Error deleting box:", error);
+  }
+});
+
 app.get("/boxes/:box_id/items", async (req, res) => {
   try {
     const { box_id } = req.params;
