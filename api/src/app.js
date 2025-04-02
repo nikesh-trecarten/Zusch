@@ -13,6 +13,25 @@ app.use((req, res, next) => {
   next();
 });
 
+const requireAuth = (req, res, next) => {
+  if (!req.auth.userId) {
+    return next(new Error("Unauthenticated"));
+  }
+  next();
+};
+
+const decodeAuthHeaders = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    req.auth = {};
+  } else {
+    req.auth = { userId: authHeader }; // Simulate userId extraction from token
+  }
+  next();
+};
+
+app.use(decodeAuthHeaders);
+
 app.get("/", (req, res) => {
   return res.json({ msg: "API is up and running" });
 });
@@ -107,20 +126,6 @@ app.get("/boxes", async (req, res) => {
   }
 });
 
-app.post("/boxes", async (req, res) => {
-  const { user_id, location } = req.body;
-  try {
-    const result = await db("boxes").insert({
-      user_id: user_id,
-      location,
-    });
-    res.json({ message: "Box placed in map" });
-  } catch (error) {
-    console.error("Error placing box in map:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
 app.get("/boxes/:box_id", async (req, res) => {
   try {
     const { box_id } = req.params;
@@ -135,12 +140,30 @@ app.get("/boxes/:box_id", async (req, res) => {
   }
 });
 
-app.delete("/boxes", async (req, res) => {
+app.post("/boxes", requireAuth, async (req, res) => {
+  const { userId } = req.auth;
+  const { location } = req.body;
+  try {
+    const result = await db("boxes").insert({
+      user_id: userId,
+      location,
+    });
+    res.json({ message: "Box placed in map" });
+  } catch (error) {
+    console.error("Error placing box in map:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.delete("/boxes", requireAuth, async (req, res) => {
+  const { userId } = req.auth;
   const { box_id } = req.body;
   try {
-    const result = await db("boxes").where({ box_id }).del();
+    const result = await db("boxes").where({ box_id, user_id: userId }).del();
     if (result === 0) {
-      return res.status(404).json({ error: "Box not found" });
+      return res
+        .status(404)
+        .json({ error: "Unable to find box for this user" });
     }
     res.json({ message: "Box deleted" });
   } catch (error) {

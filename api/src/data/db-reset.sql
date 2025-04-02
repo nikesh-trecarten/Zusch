@@ -18,7 +18,7 @@ country VARCHAR(255)
 
 CREATE TABLE boxes (
 box_id SERIAL PRIMARY KEY,
-user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
+user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
 location GEOGRAPHY(Point, 4326)
 );
 
