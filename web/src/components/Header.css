@@ -4,10 +4,6 @@
   justify-content: space-between;
 }
 
-.header h2 {
-  margin: 5px;
-}
-
-.links {
-  display: flex;
+a {
+  text-decoration: none;
 }

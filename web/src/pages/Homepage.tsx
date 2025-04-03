@@ -1,7 +1,7 @@
-import "./Homepage.css";
+import "./HomePage.css";
 import { Map } from "../components/Map";
 
-export function Homepage() {
+export function HomePage() {
   return (
     <>
       <h3>
