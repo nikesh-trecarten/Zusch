@@ -19,7 +19,9 @@ country VARCHAR(255) NOT NULL
 CREATE TABLE boxes (
 box_id SERIAL PRIMARY KEY,
 user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-location GEOGRAPHY(Point, 4326) NOT NULL
+location GEOGRAPHY(Point, 4326) NOT NULL,
+latitude DOUBLE PRECISION GENERATED ALWAYS AS (ST_Y(location::geometry)) STORED,
+longitude DOUBLE PRECISION GENERATED ALWAYS AS (ST_X(location::geometry)) STORED
 );
 
 CREATE TABLE items (
