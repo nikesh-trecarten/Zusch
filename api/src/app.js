@@ -155,6 +155,21 @@ app.post("/boxes", requireAuth, async (req, res) => {
   }
 });
 
+app.patch("/boxes/:box_id", requireAuth, async (req, res) => {
+  const { userId } = req.auth;
+  const { box_id } = req.params;
+  const { location } = req.body;
+  try {
+    const result = await db("boxes")
+      .where({ box_id, user_id: userId })
+      .update({ location });
+    res.json({ message: "Box moved successfully" });
+  } catch (error) {
+    console.error("Error moving box:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 app.delete("/boxes", requireAuth, async (req, res) => {
   const { userId } = req.auth;
   const { box_id } = req.body;
