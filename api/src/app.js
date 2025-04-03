@@ -155,14 +155,18 @@ app.post("/boxes", requireAuth, async (req, res) => {
   }
 });
 
-app.patch("/boxes/:box_id", requireAuth, async (req, res) => {
+app.patch("/boxes", requireAuth, async (req, res) => {
   const { userId } = req.auth;
-  const { box_id } = req.params;
-  const { location } = req.body;
+  const { box_id, location } = req.body;
   try {
     const result = await db("boxes")
       .where({ box_id, user_id: userId })
       .update({ location });
+    if (result === 0) {
+      return res
+        .status(404)
+        .json({ error: "Unable to find box for this user" });
+    }
     res.json({ message: "Box moved successfully" });
   } catch (error) {
     console.error("Error moving box:", error);
