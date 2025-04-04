@@ -2,8 +2,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin: 0 20px 0 20px;
 }
 
 a {
   text-decoration: none;
+}
+
+h2:hover {
+  cursor: pointer;
 }
