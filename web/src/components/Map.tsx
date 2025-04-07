@@ -1,6 +1,13 @@
-import { MapContainer, Popup, TileLayer, Marker } from "react-leaflet";
+import {
+  MapContainer,
+  Popup,
+  TileLayer,
+  Marker,
+  useMapEvents,
+} from "react-leaflet";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useUser } from "@clerk/clerk-react";
 
 const API_HOST = import.meta.env.VITE_API_HOST;
 
@@ -11,7 +18,12 @@ interface Box {
 }
 
 export function Map() {
+  const { user } = useUser();
   const [boxes, setBoxes] = useState<Box[]>([]);
+  const [userBoxMarkers, setUserBoxMarkers] = useState<
+    { lat: number; lng: number }[]
+  >([]);
+
   useEffect(() => {
     async function fetchBoxes() {
       try {
@@ -23,6 +35,41 @@ export function Map() {
     }
     fetchBoxes();
   }, []);
+
+  function AddUserBoxesOnClick() {
+    useMapEvents({
+      click(e) {
+        if (!user) {
+          console.error("User is not authenticated");
+          alert("Please log in to add a box.");
+          return;
+        }
+
+        const { lat, lng } = e.latlng;
+        setUserBoxMarkers((prevMarkers) => [...prevMarkers, { lat, lng }]);
+
+        const newBox = {
+          location: `SRID=4326;POINT(${lng} ${lat})`,
+        };
+
+        axios
+          .post(`${API_HOST}/boxes`, newBox, {
+            headers: {
+              Authorization: user.id,
+            },
+          })
+          .then(() => {
+            axios.get(`${API_HOST}/boxes`).then((response) => {
+              setBoxes(response.data);
+            });
+          })
+          .catch((error) => {
+            console.error("There was a problem adding the new box:", error);
+          });
+      },
+    });
+    return null;
+  }
 
   return (
     <MapContainer
@@ -39,6 +86,12 @@ export function Map() {
           <Popup>List of checkable items</Popup>
         </Marker>
       ))}
+      {userBoxMarkers.map((marker, index) => (
+        <Marker key={index} position={[marker.lat, marker.lng]}>
+          <Popup>User Marker</Popup>
+        </Marker>
+      ))}
+      <AddUserBoxesOnClick />
     </MapContainer>
   );
 }
