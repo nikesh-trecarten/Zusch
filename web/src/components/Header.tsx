@@ -1,9 +1,10 @@
 import "./Header.css";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import {
   SignedIn,
   SignedOut,
   SignInButton,
+  SignUpButton,
   SignOutButton,
 } from "@clerk/clerk-react";
 
@@ -15,9 +16,14 @@ export function Header() {
           <Link to="/">Zusch!</Link>
         </h1>
         <SignedOut>
-          <SignInButton mode="modal">
-            <h2>Sign In / Sign Up</h2>
-          </SignInButton>
+          <div className="clerk-buttons">
+            <SignInButton mode="modal">
+              <h2>Sign In</h2>
+            </SignInButton>
+            <SignUpButton forceRedirectUrl={"/register"} mode="modal">
+              <h2>Sign Up</h2>
+            </SignUpButton>
+          </div>
         </SignedOut>
         <SignedIn>
           <SignOutButton>

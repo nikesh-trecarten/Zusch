@@ -5,6 +5,11 @@
   margin: 0 20px 0 20px;
 }
 
+.clerk-buttons {
+  display: flex;
+  gap: 20px;
+}
+
 a {
   text-decoration: none;
 }

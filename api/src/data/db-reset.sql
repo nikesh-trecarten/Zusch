@@ -7,8 +7,9 @@ DROP TABLE IF EXISTS users;
 
 CREATE TABLE users (
 user_id SERIAL PRIMARY KEY,
-user_name VARCHAR(255) NOT NULL,
-email VARCHAR(255) NOT NULL,
+clerk_id VARCHAR(255) UNIQUE NOT NULL,
+user_name VARCHAR(255) UNIQUE NOT NULL,
+email VARCHAR(255) UNIQUE NOT NULL,
 street VARCHAR(255) NOT NULL,
 house_number VARCHAR(255) NOT NULL,
 postal_code VARCHAR(255) NOT NULL,
@@ -26,14 +27,14 @@ longitude DOUBLE PRECISION GENERATED ALWAYS AS (ST_X(location::geometry)) STORED
 
 CREATE TABLE items (
 item_id SERIAL PRIMARY KEY,
-box_id INT  NOT NULL REFERENCES boxes(box_id) ON DELETE CASCADE,
+box_id INT NOT NULL REFERENCES boxes(box_id) ON DELETE CASCADE,
 item_name VARCHAR(255) NOT NULL
 );
 
-INSERT INTO users (user_name, email, street, house_number, postal_code, city, country) VALUES
-('test_user1', 'test1@test.de', 'Mozartstrasse', '4-10', '53115', 'Bonn', 'Germany'),
-('test_user2', 'test2@test.de', 'Mozartstrasse', '4-10', '53115', 'Bonn', 'Germany'),
-('test_user3', 'test3@test.de', 'Mozartstrasse', '4-10', '53115', 'Bonn', 'Germany');
+INSERT INTO users (clerk_id, user_name, email, street, house_number, postal_code, city, country) VALUES
+('test_clerk_id1', 'test_user1', 'test1@test.de', 'Mozartstrasse', '4-10', '53115', 'Bonn', 'Germany'),
+('test_clerk_id2', 'test_user2', 'test2@test.de', 'Mozartstrasse', '4-10', '53115', 'Bonn', 'Germany'),
+('test_clerk_id3', 'test_user3', 'test3@test.de', 'Mozartstrasse', '4-10', '53115', 'Bonn', 'Germany');
 
 INSERT INTO boxes (user_id, location) VALUES -- enter longitude before latitude
 (1, ST_GeographyFromText('SRID=4326;POINT(7.090183 50.732843)')),

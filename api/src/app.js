@@ -37,10 +37,19 @@ app.get("/", (req, res) => {
 });
 
 app.post("/register", async (req, res) => {
-  const { user_name, email, street, house_number, postal_code, city, country } =
-    req.body;
+  const {
+    clerk_id,
+    user_name,
+    email,
+    street,
+    house_number,
+    postal_code,
+    city,
+    country,
+  } = req.body;
   try {
     if (
+      !clerk_id ||
       !user_name ||
       !email ||
       !street ||
@@ -61,6 +70,7 @@ app.post("/register", async (req, res) => {
     }
     const newUser = await db("users")
       .insert({
+        clerk_id,
         user_name,
         email,
         street,
@@ -73,7 +83,7 @@ app.post("/register", async (req, res) => {
     res.json({ message: "User created successfully", data: newUser });
   } catch (error) {
     console.error("Error creating user:", error);
-    res.status(500).json({ error: "Interal server error" });
+    res.status(500).json({ error: "Failed to register user" });
   }
 });
 
