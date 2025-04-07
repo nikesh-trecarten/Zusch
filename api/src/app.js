@@ -115,11 +115,28 @@ app.get("/users/", async (req, res) => {
   }
 });
 
-app.get("/users/:user_id", async (req, res) => {
+// app.get("/users/:user_id", async (req, res) => {
+//   try {
+//     const { user_id } = req.params;
+//     const data = await db.select().from("users").where({ user_id });
+//     if (data.length === 0) {
+//       return res.status(404).json({ error: "User not found" });
+//     }
+//     res.json(data);
+//   } catch (error) {
+//     console.error("Error fetching user:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
+
+app.get("/users/:clerk_id", async (req, res) => {
   try {
-    const { user_id } = req.params;
-    const data = await db.select().from("users").where({ user_id });
-    res.json(data);
+    const { clerk_id } = req.params;
+    const data = await db.select().from("users").where({ clerk_id });
+    if (data.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.json(data[0]);
   } catch (error) {
     console.error("Error fetching user:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -151,11 +168,21 @@ app.get("/boxes/:box_id", async (req, res) => {
 });
 
 app.post("/boxes", requireAuth, async (req, res) => {
-  const { userId } = req.auth;
+  const { userId: clerk_id } = req.auth;
   const { location } = req.body;
   try {
-    const result = await db("boxes").insert({
-      user_id: userId,
+    const zuschUserId = await db("users")
+      .select("user_id")
+      .where({ clerk_id })
+      .first();
+    if (!zuschUserId) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const { user_id } = zuschUserId;
+
+    await db("boxes").insert({
+      user_id,
       location,
     });
     res.json({ message: "Box placed in map" });
