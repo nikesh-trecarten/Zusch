@@ -9,3 +9,8 @@ h3 {
 input {
   width: 200px;
 }
+
+p {
+  text-align: center;
+  font-style: italic;
+}
