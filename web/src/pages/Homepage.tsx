@@ -1,11 +1,13 @@
 import "./HomePage.css";
 import { Map } from "../components/Map";
 import { useUser } from "@clerk/clerk-react";
+import { Header } from "../components/Header";
 
 export function HomePage() {
   const { user } = useUser();
   return (
     <>
+      <Header />
       <h3>
         {user && "Welcome " + `${user.username!}` + "!"} <br />
         There are X boxes near you, full of items looking for a new home!
