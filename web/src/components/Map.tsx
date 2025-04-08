@@ -20,9 +20,6 @@ interface Box {
 export function Map() {
   const { user } = useUser();
   const [boxes, setBoxes] = useState<Box[]>([]);
-  const [userBoxMarkers, setUserBoxMarkers] = useState<
-    { lat: number; lng: number }[]
-  >([]);
 
   useEffect(() => {
     async function fetchBoxes() {
@@ -46,7 +43,6 @@ export function Map() {
         }
 
         const { lat, lng } = e.latlng;
-        setUserBoxMarkers((prevMarkers) => [...prevMarkers, { lat, lng }]);
 
         const newBox = {
           location: `SRID=4326;POINT(${lng} ${lat})`,
@@ -84,11 +80,6 @@ export function Map() {
       {boxes.map((box) => (
         <Marker key={box.box_id} position={[box.latitude, box.longitude]}>
           <Popup>List of checkable items</Popup>
-        </Marker>
-      ))}
-      {userBoxMarkers.map((marker, index) => (
-        <Marker key={index} position={[marker.lat, marker.lng]}>
-          <Popup>User Marker</Popup>
         </Marker>
       ))}
       <AddUserBoxesOnClick />
