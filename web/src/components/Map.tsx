@@ -27,6 +27,8 @@ export function Map() {
   const { user } = useUser();
   const [boxes, setBoxes] = useState<Box[]>([]);
   const [boxItems, setBoxItems] = useState<Record<number, Item[]>>({});
+  const [newItemName, setNewItemName] = useState("");
+  // const [newItemBoxId, setNewItemBoxId] = useState<number | null>(null);
 
   useEffect(() => {
     async function fetchBoxes() {
@@ -103,6 +105,46 @@ export function Map() {
     return null;
   }
 
+  const handleAddItem = async (e: React.FormEvent, box_id: number) => {
+    e.preventDefault();
+
+    if (!user) {
+      console.error("User is not authenticated");
+      return;
+    }
+
+    if (!newItemName.trim()) {
+      return;
+    }
+
+    try {
+      const newItem = {
+        box_id,
+        item_name: newItemName,
+      };
+      const response = await axios.post(
+        `${API_HOST}/boxes/${box_id}/items`,
+        newItem,
+        {
+          headers: {
+            Authorization: user.id,
+          },
+        }
+      );
+
+      const itemToBeAdded: Item = response.data;
+
+      setBoxItems((prevItems) => {
+        const updatedItems = prevItems[box_id] ? [...prevItems[box_id]] : [];
+        updatedItems.push(itemToBeAdded);
+        return { ...prevItems, [box_id]: updatedItems };
+      });
+      setNewItemName("");
+    } catch (error) {
+      console.error("There was a problem adding the new item:", error);
+    }
+  };
+
   return (
     <MapContainer
       center={[50.73288, 7.090452]}
@@ -118,7 +160,7 @@ export function Map() {
 
         return (
           <Marker key={box.box_id} position={[box.latitude, box.longitude]}>
-            <Popup>
+            <Popup key={box.box_id}>
               <ul>
                 {boxItems[box.box_id] && boxItems[box.box_id].length > 0 ? (
                   boxItems[box.box_id].map((item) => (
@@ -128,6 +170,16 @@ export function Map() {
                   <li>Box empty</li>
                 )}
               </ul>
+              <form onSubmit={(e) => handleAddItem(e, box.box_id)}>
+                <input
+                  type="text"
+                  value={newItemName}
+                  onChange={(e) => setNewItemName(e.target.value)}
+                  placeholder="Enter a new item"
+                  required
+                />
+                <button type="submit">Add Item</button>
+              </form>
             </Popup>
           </Marker>
         );
