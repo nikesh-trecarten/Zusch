@@ -267,6 +267,22 @@ app.post("/boxes/:box_id/items", async (req, res) => {
   }
 });
 
+app.patch("/boxes/:box_id/items/:item_id", async (req, res) => {
+  try {
+    const { item_id } = req.params;
+    const { is_checked } = req.body;
+
+    const updated = await db("items")
+      .where({ item_id })
+      .update({ is_checked })
+      .returning("*");
+    res.json(updated[0]);
+  } catch (error) {
+    console.error("Error updating item:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`App listening on port ${port}`);
 });

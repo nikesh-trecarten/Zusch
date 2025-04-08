@@ -28,7 +28,8 @@ longitude DOUBLE PRECISION GENERATED ALWAYS AS (ST_X(location::geometry)) STORED
 CREATE TABLE items (
 item_id SERIAL PRIMARY KEY,
 box_id INT NOT NULL REFERENCES boxes(box_id) ON DELETE CASCADE,
-item_name VARCHAR(255) NOT NULL
+item_name VARCHAR(255) NOT NULL,
+is_checked BOOLEAN DEFAULT FALSE
 );
 
 INSERT INTO users (clerk_id, user_name, email, street, house_number, postal_code, city, country) VALUES

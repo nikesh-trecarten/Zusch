@@ -22,6 +22,7 @@ interface Item {
   item_id: number;
   box_id: number;
   item_name: string;
+  is_checked: boolean;
 }
 
 export function Map() {
@@ -169,6 +170,30 @@ export function Map() {
     }
   };
 
+  const handleCheckItem = async (box: Box, item: Item) => {
+    try {
+      const updated = {
+        is_checked: !item.is_checked,
+      };
+      await axios.patch(
+        `${API_HOST}/boxes/${box.box_id}/items/${item.item_id}`,
+        updated
+      );
+
+      setBoxItems((prev) => {
+        const items = prev[item.box_id] || [];
+        const updatedItems = items.map((i) =>
+          i.item_id === item.item_id
+            ? { ...i, is_checked: updated.is_checked }
+            : i
+        );
+        return { ...prev, [item.box_id]: updatedItems };
+      });
+    } catch (error) {
+      console.error("There was a problem updating the item:", error);
+    }
+  };
+
   return (
     <MapContainer
       center={[50.73288, 7.090452]}
@@ -187,7 +212,22 @@ export function Map() {
               <ul>
                 {boxItems[box.box_id] && boxItems[box.box_id].length > 0 ? (
                   boxItems[box.box_id].map((item) => (
-                    <li key={item.item_id}>{item.item_name}</li>
+                    <li key={item.item_id}>
+                      <label
+                        style={{
+                          textDecoration: item.is_checked
+                            ? "line-through"
+                            : "none",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={item.is_checked}
+                          onChange={() => handleCheckItem(box, item)}
+                        />
+                        {item.item_name}
+                      </label>
+                    </li>
                   ))
                 ) : (
                   <li>Box empty</li>
