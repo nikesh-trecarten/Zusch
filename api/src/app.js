@@ -104,7 +104,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/users/", async (req, res) => {
+app.get("/users", async (req, res) => {
   try {
     const { user_id } = req.params;
     const data = await db.select().from("users");

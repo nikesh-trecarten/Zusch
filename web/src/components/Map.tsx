@@ -13,6 +13,7 @@ const API_HOST = import.meta.env.VITE_API_HOST;
 
 interface Box {
   box_id: number;
+  user_id: number;
   latitude: number;
   longitude: number;
 }
@@ -29,6 +30,29 @@ export function Map() {
   const [boxItems, setBoxItems] = useState<Record<number, Item[]>>({});
   const [newItemName, setNewItemName] = useState("");
   // const [newItemBoxId, setNewItemBoxId] = useState<number | null>(null);
+  const [zuschUserId, setZuschUserId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      if (!user?.id) return;
+      try {
+        console.log("Fetching zuschUserId with clerk_id:", user?.id);
+        const response = await axios.get(`${API_HOST}/users/${user.id}`, {
+          params: { clerk_id: user?.id },
+        });
+        if (response.data && response.data.user_id) {
+          setZuschUserId(response.data.user_id);
+        } else {
+          console.warn("User not found or invalid clerk_id");
+        }
+      } catch (error) {
+        console.error("There was a problem fetching the user ID:", error);
+      }
+    };
+    if (user) {
+      fetchUserId();
+    }
+  }, [user]);
 
   useEffect(() => {
     async function fetchBoxes() {
@@ -156,8 +180,7 @@ export function Map() {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
       {boxes.map((box) => {
-        console.log("boxItems for", box.box_id, ":", boxItems[box.box_id]);
-
+        console.log("box.user_id:", box.user_id, "zuschUserId:", zuschUserId);
         return (
           <Marker key={box.box_id} position={[box.latitude, box.longitude]}>
             <Popup key={box.box_id}>
@@ -170,16 +193,18 @@ export function Map() {
                   <li>Box empty</li>
                 )}
               </ul>
-              <form onSubmit={(e) => handleAddItem(e, box.box_id)}>
-                <input
-                  type="text"
-                  value={newItemName}
-                  onChange={(e) => setNewItemName(e.target.value)}
-                  placeholder="Enter a new item"
-                  required
-                />
-                <button type="submit">Add Item</button>
-              </form>
+              {box.user_id === zuschUserId && (
+                <form onSubmit={(e) => handleAddItem(e, box.box_id)}>
+                  <input
+                    type="text"
+                    value={newItemName}
+                    onChange={(e) => setNewItemName(e.target.value)}
+                    placeholder="Enter a new item"
+                    required
+                  />
+                  <button type="submit">Add Item</button>
+                </form>
+              )}
             </Popup>
           </Marker>
         );
