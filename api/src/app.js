@@ -25,7 +25,7 @@ const decodeAuthHeaders = (req, res, next) => {
   if (!authHeader) {
     req.auth = {};
   } else {
-    req.auth = { userId: authHeader }; // Simulate userId extraction from token
+    req.auth = { userId: authHeader };
   }
   next();
 };
@@ -230,7 +230,7 @@ app.delete("/boxes", requireAuth, async (req, res) => {
 app.get("/boxes/:box_id/items", async (req, res) => {
   try {
     const { box_id } = req.params;
-    const data = await db.select().from("items").where({ box_id: box_id });
+    const data = await db.select().from("items").where({ box_id });
     res.json(data);
   } catch (error) {
     console.error("Error fetching box:", error);

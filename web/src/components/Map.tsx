@@ -17,14 +17,22 @@ interface Box {
   longitude: number;
 }
 
+interface Item {
+  item_id: number;
+  box_id: number;
+  item_name: string;
+}
+
 export function Map() {
   const { user } = useUser();
   const [boxes, setBoxes] = useState<Box[]>([]);
+  const [boxItems, setBoxItems] = useState<Record<number, Item[]>>({});
 
   useEffect(() => {
     async function fetchBoxes() {
       try {
         const response = await axios.get(`${API_HOST}/boxes`);
+        console.log("Boxes:", response.data);
         setBoxes(response.data);
       } catch (error) {
         console.error("There was a problem fetching the boxes");
@@ -32,6 +40,34 @@ export function Map() {
     }
     fetchBoxes();
   }, []);
+
+  useEffect(() => {
+    async function fetchBoxItems() {
+      try {
+        const boxItemsData: Record<number, Item[]> = {};
+        for (const box of boxes) {
+          const response = await axios.get(
+            `${API_HOST}/boxes/${box.box_id}/items`
+          );
+          if (Array.isArray(response.data)) {
+            boxItemsData[box.box_id] = response.data;
+          } else {
+            console.warn(
+              `Unexpected data format for box ${box.box_id};`,
+              response.data
+            );
+          }
+        }
+        console.log("Setting box items:", boxItemsData);
+        setBoxItems(boxItemsData);
+      } catch (error) {
+        console.error("Error preloading box items:", error);
+      }
+    }
+    if (boxes.length > 0) {
+      fetchBoxItems();
+    }
+  }, [boxes]);
 
   function AddUserBoxesOnClick() {
     useMapEvents({
@@ -77,11 +113,25 @@ export function Map() {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
-      {boxes.map((box) => (
-        <Marker key={box.box_id} position={[box.latitude, box.longitude]}>
-          <Popup>List of checkable items</Popup>
-        </Marker>
-      ))}
+      {boxes.map((box) => {
+        console.log("boxItems for", box.box_id, ":", boxItems[box.box_id]);
+
+        return (
+          <Marker key={box.box_id} position={[box.latitude, box.longitude]}>
+            <Popup>
+              <ul>
+                {boxItems[box.box_id] && boxItems[box.box_id].length > 0 ? (
+                  boxItems[box.box_id].map((item) => (
+                    <li key={item.item_id}>{item.item_name}</li>
+                  ))
+                ) : (
+                  <li>Box empty</li>
+                )}
+              </ul>
+            </Popup>
+          </Marker>
+        );
+      })}
       <AddUserBoxesOnClick />
     </MapContainer>
   );
