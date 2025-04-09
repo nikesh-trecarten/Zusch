@@ -256,11 +256,14 @@ app.post("/boxes/:box_id/items", async (req, res) => {
   const { box_id } = req.params;
   const { item_name } = req.body;
   try {
-    const result = await db("items").insert({
-      box_id: box_id,
-      item_name,
-    });
-    res.json({ message: "Item added to box:" });
+    const result = await db("items")
+      .insert({
+        box_id: box_id,
+        item_name,
+      })
+      .returning("*");
+    const patchedResult = result[0];
+    res.json(patchedResult);
   } catch (error) {
     console.error("Error adding item to box:", error);
     res.status(500).json({ error: "Internal server error" });

@@ -1,3 +1,4 @@
+import "./Map.css";
 import {
   MapContainer,
   Popup,
@@ -28,7 +29,7 @@ interface Item {
 export function Map() {
   const { user } = useUser();
   const [boxes, setBoxes] = useState<Box[]>([]);
-  const [boxItems, setBoxItems] = useState<Record<number, Item[]>>({});
+  const [boxItems, setBoxItems] = useState<Item[]>([]);
   const [newItemName, setNewItemName] = useState("");
   // const [newItemBoxId, setNewItemBoxId] = useState<number | null>(null);
   const [zuschUserId, setZuschUserId] = useState<number | null>(null);
@@ -37,7 +38,6 @@ export function Map() {
     const fetchUserId = async () => {
       if (!user?.id) return;
       try {
-        console.log("Fetching zuschUserId with clerk_id:", user?.id);
         const response = await axios.get(`${API_HOST}/users/${user.id}`, {
           params: { clerk_id: user?.id },
         });
@@ -59,7 +59,6 @@ export function Map() {
     async function fetchBoxes() {
       try {
         const response = await axios.get(`${API_HOST}/boxes`);
-        console.log("Boxes:", response.data);
         setBoxes(response.data);
       } catch (error) {
         console.error("There was a problem fetching the boxes");
@@ -71,21 +70,13 @@ export function Map() {
   useEffect(() => {
     async function fetchBoxItems() {
       try {
-        const boxItemsData: Record<number, Item[]> = {};
+        const boxItemsData: Item[] = [];
         for (const box of boxes) {
           const response = await axios.get(
             `${API_HOST}/boxes/${box.box_id}/items`
           );
-          if (Array.isArray(response.data)) {
-            boxItemsData[box.box_id] = response.data;
-          } else {
-            console.warn(
-              `Unexpected data format for box ${box.box_id};`,
-              response.data
-            );
-          }
+          boxItemsData.push(...response.data);
         }
-        console.log("Setting box items:", boxItemsData);
         setBoxItems(boxItemsData);
       } catch (error) {
         console.error("Error preloading box items:", error);
@@ -159,11 +150,7 @@ export function Map() {
 
       const itemToBeAdded: Item = response.data;
 
-      setBoxItems((prevItems) => {
-        const updatedItems = prevItems[box_id] ? [...prevItems[box_id]] : [];
-        updatedItems.push(itemToBeAdded);
-        return { ...prevItems, [box_id]: updatedItems };
-      });
+      setBoxItems((prevItems) => [itemToBeAdded, ...prevItems]);
       setNewItemName("");
     } catch (error) {
       console.error("There was a problem adding the new item:", error);
@@ -175,81 +162,85 @@ export function Map() {
       const updated = {
         is_checked: !item.is_checked,
       };
-      await axios.patch(
+      const response = await axios.patch(
         `${API_HOST}/boxes/${box.box_id}/items/${item.item_id}`,
         updated
       );
-
-      setBoxItems((prev) => {
-        const items = prev[item.box_id] || [];
-        const updatedItems = items.map((i) =>
-          i.item_id === item.item_id
-            ? { ...i, is_checked: updated.is_checked }
-            : i
-        );
-        return { ...prev, [item.box_id]: updatedItems };
+      const filteredItems = boxItems.filter((item) => {
+        return item.item_id !== response.data.item_id;
       });
+      const updatedItems = [...filteredItems, response.data];
+      setBoxItems(updatedItems);
+      const sortedItems = updatedItems.sort((a, b) => {
+        if (a.is_checked === b.is_checked) {
+          return 0;
+        } else if (a.is_checked && !b.is_checked) {
+          return 1;
+        } else {
+          return -1;
+        }
+      });
+      setBoxItems(sortedItems);
     } catch (error) {
       console.error("There was a problem updating the item:", error);
     }
   };
 
   return (
-    <MapContainer
-      center={[50.73288, 7.090452]}
-      zoom={16}
-      style={{ height: "400px", width: "100%" }} // height must always be defined
-    >
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-      />
-      {boxes.map((box) => {
-        console.log("box.user_id:", box.user_id, "zuschUserId:", zuschUserId);
-        return (
-          <Marker key={box.box_id} position={[box.latitude, box.longitude]}>
-            <Popup key={box.box_id}>
-              <ul>
-                {boxItems[box.box_id] && boxItems[box.box_id].length > 0 ? (
-                  boxItems[box.box_id].map((item) => (
-                    <li key={item.item_id}>
-                      <label
-                        style={{
-                          textDecoration: item.is_checked
-                            ? "line-through"
-                            : "none",
-                        }}
-                      >
+    <>
+      <MapContainer
+        center={[50.73288, 7.090452]}
+        zoom={16}
+        style={{ height: "400px", width: "100%" }} // height must always be defined
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+        {boxes.map((box) => {
+          return (
+            <Marker key={box.box_id} position={[box.latitude, box.longitude]}>
+              <Popup key={box.box_id}>
+                <ul>
+                  {boxItems
+                    .filter((item) => item.box_id === box.box_id)
+                    .map((item) => (
+                      <li key={item.item_id}>
+                        <label
+                          style={{
+                            textDecoration: item.is_checked
+                              ? "line-through"
+                              : "none",
+                          }}
+                        >
+                          {item.item_name}
+                        </label>
                         <input
                           type="checkbox"
                           checked={item.is_checked}
                           onChange={() => handleCheckItem(box, item)}
                         />
-                        {item.item_name}
-                      </label>
-                    </li>
-                  ))
-                ) : (
-                  <li>Box empty</li>
+                      </li>
+                    ))}
+                </ul>
+                {box.user_id === zuschUserId && (
+                  <form onSubmit={(e) => handleAddItem(e, box.box_id)}>
+                    <input
+                      type="text"
+                      value={newItemName}
+                      onChange={(e) => setNewItemName(e.target.value)}
+                      placeholder="Enter a new item"
+                      required
+                    />
+                    <button type="submit">Add Item</button>
+                  </form>
                 )}
-              </ul>
-              {box.user_id === zuschUserId && (
-                <form onSubmit={(e) => handleAddItem(e, box.box_id)}>
-                  <input
-                    type="text"
-                    value={newItemName}
-                    onChange={(e) => setNewItemName(e.target.value)}
-                    placeholder="Enter a new item"
-                    required
-                  />
-                  <button type="submit">Add Item</button>
-                </form>
-              )}
-            </Popup>
-          </Marker>
-        );
-      })}
-      <AddUserBoxesOnClick />
-    </MapContainer>
+              </Popup>
+            </Marker>
+          );
+        })}
+        <AddUserBoxesOnClick />
+      </MapContainer>
+    </>
   );
 }
