@@ -14,3 +14,7 @@ Givers post a box on a map and create a list of its contents. They can remove it
 
 Seekers can find boxes and their items on the map, and come by to take a look!
 Seekers can cross out items from the boxes if they take an item, or if they notice someone else already took an item.
+
+### Attributions:
+
+https://github.com/pointhi/leaflet-color-markers
