@@ -115,20 +115,6 @@ app.get("/users", async (req, res) => {
   }
 });
 
-// app.get("/users/:user_id", async (req, res) => {
-//   try {
-//     const { user_id } = req.params;
-//     const data = await db.select().from("users").where({ user_id });
-//     if (data.length === 0) {
-//       return res.status(404).json({ error: "User not found" });
-//     }
-//     res.json(data);
-//   } catch (error) {
-//     console.error("Error fetching user:", error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// });
-
 app.get("/users/:clerk_id", async (req, res) => {
   try {
     const { clerk_id } = req.params;
@@ -211,11 +197,19 @@ app.patch("/boxes", requireAuth, async (req, res) => {
   }
 });
 
-app.delete("/boxes", requireAuth, async (req, res) => {
+app.delete("/boxes/:box_id", requireAuth, async (req, res) => {
   const { userId } = req.auth;
-  const { box_id } = req.body;
+  const { box_id } = req.params;
   try {
-    const result = await db("boxes").where({ box_id, user_id: userId }).del();
+    const user = await db("users")
+      .select("user_id")
+      .where({ clerk_id: userId })
+      .first();
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const { user_id } = user;
+    const result = await db("boxes").where({ box_id, user_id }).del();
     if (result === 0) {
       return res
         .status(404)
