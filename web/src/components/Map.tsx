@@ -31,7 +31,6 @@ export function Map() {
   const [boxes, setBoxes] = useState<Box[]>([]);
   const [boxItems, setBoxItems] = useState<Item[]>([]);
   const [newItemName, setNewItemName] = useState("");
-  // const [newItemBoxId, setNewItemBoxId] = useState<number | null>(null);
   const [zuschUserId, setZuschUserId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -186,6 +185,26 @@ export function Map() {
     }
   };
 
+  const handleDeleteBox = async (box: Box) => {
+    if (!user) {
+      console.error("User is not authenticated");
+      return;
+    }
+    try {
+      await axios.delete(`${API_HOST}/boxes/${box.box_id}`, {
+        headers: {
+          Authorization: user.id,
+        },
+      });
+      setBoxes((prevBoxes) => prevBoxes.filter((b) => b.box_id !== box.box_id));
+      setBoxItems((prevItems) =>
+        prevItems.filter((item) => item.box_id !== box.box_id)
+      );
+    } catch (error) {
+      console.error("There was a problem deleting the box:", error);
+    }
+  };
+
   return (
     <>
       <MapContainer
@@ -224,16 +243,21 @@ export function Map() {
                     ))}
                 </ul>
                 {box.user_id === zuschUserId && (
-                  <form onSubmit={(e) => handleAddItem(e, box.box_id)}>
-                    <input
-                      type="text"
-                      value={newItemName}
-                      onChange={(e) => setNewItemName(e.target.value)}
-                      placeholder="Enter a new item"
-                      required
-                    />
-                    <button type="submit">Add Item</button>
-                  </form>
+                  <>
+                    <form onSubmit={(e) => handleAddItem(e, box.box_id)}>
+                      <input
+                        type="text"
+                        value={newItemName}
+                        onChange={(e) => setNewItemName(e.target.value)}
+                        placeholder="Enter a new item"
+                        required
+                      />
+                      <button type="submit">Add Item</button>
+                    </form>
+                    <button onClick={() => handleDeleteBox(box)}>
+                      Delete Box
+                    </button>
+                  </>
                 )}
               </Popup>
             </Marker>
