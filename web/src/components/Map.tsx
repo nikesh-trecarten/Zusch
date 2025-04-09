@@ -1,4 +1,5 @@
 import "./Map.css";
+import L from "leaflet";
 import {
   MapContainer,
   Popup,
@@ -205,6 +206,34 @@ export function Map() {
     }
   };
 
+  const getIconColor = (box: Box) => {
+    const items = boxItems.filter((item) => item.box_id === box.box_id);
+    const isOwner = box.user_id === zuschUserId;
+    const isEmptyOrAllChecked =
+      items.length === 0 || items.every((item) => item.is_checked);
+
+    let iconColor = "";
+
+    if (isOwner && isEmptyOrAllChecked) {
+      iconColor = "gold";
+    } else if (isOwner) {
+      iconColor = "blue";
+    } else if (isEmptyOrAllChecked) {
+      iconColor = "grey";
+    } else {
+      iconColor = "green";
+    }
+
+    const iconUrl = `/marker-icon-${iconColor}.png`;
+
+    return L.icon({
+      iconUrl,
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+    });
+  };
+
   return (
     <>
       <MapContainer
@@ -218,7 +247,11 @@ export function Map() {
         />
         {boxes.map((box) => {
           return (
-            <Marker key={box.box_id} position={[box.latitude, box.longitude]}>
+            <Marker
+              key={box.box_id}
+              position={[box.latitude, box.longitude]}
+              icon={getIconColor(box)}
+            >
               <Popup key={box.box_id}>
                 <ul>
                   {boxItems
