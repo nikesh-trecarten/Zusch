@@ -25,7 +25,7 @@ const decodeAuthHeaders = (req, res, next) => {
   if (!authHeader) {
     req.auth = {};
   } else {
-    req.auth = { userId: authHeader }; // Simulate userId extraction from token
+    req.auth = { userId: authHeader };
   }
   next();
 };
@@ -104,7 +104,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/users/", async (req, res) => {
+app.get("/users", async (req, res) => {
   try {
     const { user_id } = req.params;
     const data = await db.select().from("users");
@@ -230,7 +230,7 @@ app.delete("/boxes", requireAuth, async (req, res) => {
 app.get("/boxes/:box_id/items", async (req, res) => {
   try {
     const { box_id } = req.params;
-    const data = await db.select().from("items").where({ box_id: box_id });
+    const data = await db.select().from("items").where({ box_id });
     res.json(data);
   } catch (error) {
     console.error("Error fetching box:", error);
@@ -256,13 +256,32 @@ app.post("/boxes/:box_id/items", async (req, res) => {
   const { box_id } = req.params;
   const { item_name } = req.body;
   try {
-    const result = await db("items").insert({
-      box_id: box_id,
-      item_name,
-    });
-    res.json({ message: "Item added to box:" });
+    const result = await db("items")
+      .insert({
+        box_id: box_id,
+        item_name,
+      })
+      .returning("*");
+    const patchedResult = result[0];
+    res.json(patchedResult);
   } catch (error) {
     console.error("Error adding item to box:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.patch("/boxes/:box_id/items/:item_id", async (req, res) => {
+  try {
+    const { item_id } = req.params;
+    const { is_checked } = req.body;
+
+    const updated = await db("items")
+      .where({ item_id })
+      .update({ is_checked })
+      .returning("*");
+    res.json(updated[0]);
+  } catch (error) {
+    console.error("Error updating item:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
