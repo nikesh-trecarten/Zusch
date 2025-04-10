@@ -230,7 +230,7 @@ export function Map() {
       iconUrl,
       iconSize: [25, 41],
       iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
+      popupAnchor: [1, -40],
     });
   };
 
@@ -256,24 +256,40 @@ export function Map() {
                 <ul>
                   {boxItems
                     .filter((item) => item.box_id === box.box_id)
-                    .map((item) => (
-                      <li key={item.item_id}>
-                        <label
-                          style={{
-                            textDecoration: item.is_checked
-                              ? "line-through"
-                              : "none",
-                          }}
-                        >
-                          {item.item_name}
-                        </label>
-                        <input
-                          type="checkbox"
-                          checked={item.is_checked}
-                          onChange={() => handleCheckItem(box, item)}
-                        />
+                    .every((item) => item.is_checked) &&
+                    boxItems.filter((item) => item.box_id === box.box_id)
+                      .length > 0 && (
+                      <li>
+                        It looks like all these items have found a new home!
                       </li>
-                    ))}
+                    )}
+                  {boxItems.filter((item) => item.box_id === box.box_id)
+                    .length > 0 ? (
+                    boxItems
+                      .filter((item) => item.box_id === box.box_id)
+                      .map((item) => (
+                        <li key={item.item_id}>
+                          <label
+                            style={{
+                              textDecoration: item.is_checked
+                                ? "line-through"
+                                : "none",
+                            }}
+                          >
+                            {item.item_name}
+                          </label>
+                          <input
+                            type="checkbox"
+                            checked={item.is_checked}
+                            onChange={() => handleCheckItem(box, item)}
+                          />
+                        </li>
+                      ))
+                  ) : (
+                    <li>
+                      This box is empty, add items for other users to find!
+                    </li>
+                  )}
                 </ul>
                 {box.user_id === zuschUserId && (
                   <>
