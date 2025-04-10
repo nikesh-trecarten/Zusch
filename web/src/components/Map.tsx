@@ -30,7 +30,7 @@ interface Item {
 export function Map() {
   const { user } = useUser();
   const [boxes, setBoxes] = useState<Box[]>([]);
-  const [boxItems, setBoxItems] = useState<Item[]>([]);
+  const [items, setItems] = useState<Item[]>([]);
   const [newItemName, setNewItemName] = useState("");
   const [zuschUserId, setZuschUserId] = useState<number | null>(null);
 
@@ -68,22 +68,22 @@ export function Map() {
   }, []);
 
   useEffect(() => {
-    async function fetchBoxItems() {
+    async function fetchItems() {
       try {
-        const boxItemsData: Item[] = [];
+        const itemsData: Item[] = [];
         for (const box of boxes) {
           const response = await axios.get(
             `${API_HOST}/boxes/${box.box_id}/items`
           );
-          boxItemsData.push(...response.data);
+          itemsData.push(...response.data);
         }
-        setBoxItems(boxItemsData);
+        setItems(itemsData);
       } catch (error) {
         console.error("Error preloading box items:", error);
       }
     }
     if (boxes.length > 0) {
-      fetchBoxItems();
+      fetchItems();
     }
   }, [boxes]);
 
@@ -150,7 +150,7 @@ export function Map() {
 
       const itemToBeAdded: Item = response.data;
 
-      setBoxItems((prevItems) => [itemToBeAdded, ...prevItems]);
+      setItems((prevItems) => [itemToBeAdded, ...prevItems]);
       setNewItemName("");
     } catch (error) {
       console.error("There was a problem adding the new item:", error);
@@ -166,11 +166,11 @@ export function Map() {
         `${API_HOST}/boxes/${box.box_id}/items/${item.item_id}`,
         updated
       );
-      const filteredItems = boxItems.filter((item) => {
+      const filteredItems = items.filter((item) => {
         return item.item_id !== response.data.item_id;
       });
       const updatedItems = [...filteredItems, response.data];
-      setBoxItems(updatedItems);
+      setItems(updatedItems);
       const sortedItems = updatedItems.sort((a, b) => {
         if (a.is_checked === b.is_checked) {
           return 0;
@@ -180,7 +180,7 @@ export function Map() {
           return -1;
         }
       });
-      setBoxItems(sortedItems);
+      setItems(sortedItems);
     } catch (error) {
       console.error("There was a problem updating the item:", error);
     }
@@ -198,7 +198,7 @@ export function Map() {
         },
       });
       setBoxes((prevBoxes) => prevBoxes.filter((b) => b.box_id !== box.box_id));
-      setBoxItems((prevItems) =>
+      setItems((prevItems) =>
         prevItems.filter((item) => item.box_id !== box.box_id)
       );
     } catch (error) {
@@ -207,10 +207,10 @@ export function Map() {
   };
 
   const getIconColor = (box: Box) => {
-    const items = boxItems.filter((item) => item.box_id === box.box_id);
+    const itemsByBox = items.filter((item) => item.box_id === box.box_id);
     const isOwner = box.user_id === zuschUserId;
     const isEmptyOrAllChecked =
-      items.length === 0 || items.every((item) => item.is_checked);
+      itemsByBox.length === 0 || itemsByBox.every((item) => item.is_checked);
 
     let iconColor = "";
 
@@ -246,6 +246,8 @@ export function Map() {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         {boxes.map((box) => {
+          const itemsByBox = items.filter((item) => item.box_id === box.box_id);
+          const isOwner = box.user_id === zuschUserId;
           return (
             <Marker
               key={box.box_id}
@@ -254,44 +256,46 @@ export function Map() {
             >
               <Popup key={box.box_id}>
                 <ul>
-                  {boxItems
-                    .filter((item) => item.box_id === box.box_id)
-                    .every((item) => item.is_checked) &&
-                    boxItems.filter((item) => item.box_id === box.box_id)
-                      .length > 0 && (
+                  {itemsByBox.every((item) => item.is_checked) &&
+                  itemsByBox.length > 0 ? (
+                    isOwner ? (
                       <li>
-                        It looks like all these items have found a new home!
+                        It looks like all your items have found a new home!
+                        Please remove this box when you can, or add new items!
                       </li>
-                    )}
-                  {boxItems.filter((item) => item.box_id === box.box_id)
-                    .length > 0 ? (
-                    boxItems
-                      .filter((item) => item.box_id === box.box_id)
-                      .map((item) => (
-                        <li key={item.item_id}>
-                          <label
-                            style={{
-                              textDecoration: item.is_checked
-                                ? "line-through"
-                                : "none",
-                            }}
-                          >
-                            {item.item_name}
-                          </label>
-                          <input
-                            type="checkbox"
-                            checked={item.is_checked}
-                            onChange={() => handleCheckItem(box, item)}
-                          />
-                        </li>
-                      ))
+                    ) : (
+                      <li>
+                        It looks like all these items have already found a new
+                        home!
+                      </li>
+                    )
+                  ) : null}
+                  {itemsByBox.length > 0 ? (
+                    itemsByBox.map((item) => (
+                      <li key={item.item_id}>
+                        <label
+                          style={{
+                            textDecoration: item.is_checked
+                              ? "line-through"
+                              : "none",
+                          }}
+                        >
+                          {item.item_name}
+                        </label>
+                        <input
+                          type="checkbox"
+                          checked={item.is_checked}
+                          onChange={() => handleCheckItem(box, item)}
+                        />
+                      </li>
+                    ))
                   ) : (
                     <li>
                       This box is empty, add items for other users to find!
                     </li>
                   )}
                 </ul>
-                {box.user_id === zuschUserId && (
+                {isOwner && (
                   <>
                     <form onSubmit={(e) => handleAddItem(e, box.box_id)}>
                       <input
