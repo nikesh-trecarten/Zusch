@@ -29,6 +29,7 @@ interface Item {
 
 export function Map() {
   const { user } = useUser();
+  const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
   const [boxes, setBoxes] = useState<Box[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [newItemName, setNewItemName] = useState("");
@@ -55,6 +56,49 @@ export function Map() {
       fetchUserId();
     }
   }, [user]);
+
+  useEffect(() => {
+    const fetchUserLocation = async () => {
+      if (!user?.id) return;
+      try {
+        const response = await axios.get(`${API_HOST}/users/${user.id}`, {
+          params: { clerk_id: user?.id },
+        });
+        const userData = response.data;
+
+        const address = `${userData.street} ${userData.house_number}, ${userData.postal_code} ${userData.city}, ${userData.country}`;
+        const geoCodeRes = await axios.get(
+          "https://nominatim.openstreetmap.org/search",
+          {
+            params: {
+              q: address,
+              format: "json",
+              limit: 1,
+            },
+            headers: {
+              "Accept-Language": "en",
+            },
+          }
+        );
+        if (geoCodeRes.data.length > 0) {
+          const { lat, lon } = geoCodeRes.data[0];
+          setMapCenter([parseFloat(lat), parseFloat(lon)]);
+        } else {
+          console.warn(
+            "No geocode data for this address, using default map center."
+          );
+        }
+      } catch (error) {
+        console.error("There was a problem fetching the user location:", error);
+      }
+    };
+
+    fetchUserLocation();
+  }, [user]);
+
+  if (!mapCenter) {
+    return <div>Loading...</div>;
+  }
 
   useEffect(() => {
     async function fetchBoxes() {
@@ -248,7 +292,7 @@ export function Map() {
   return (
     <>
       <MapContainer
-        center={[50.73288, 7.090452]}
+        center={mapCenter}
         zoom={16}
         style={{ height: "400px", width: "100%" }} // height must always be defined
       >
