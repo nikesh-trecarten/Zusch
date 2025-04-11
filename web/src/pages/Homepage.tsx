@@ -2,6 +2,7 @@ import "./HomePage.css";
 import { Map } from "../components/Map";
 import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
 import { Header } from "../components/Header";
+import { MapLegend } from "../components/MapLegend";
 
 export function HomePage() {
   const { user } = useUser();
@@ -36,9 +37,10 @@ export function HomePage() {
           Consider going as a group instead of alone. <br />
           Aim to go during daylight rather than when it's dark.
         </p>
+        <MapLegend />
       </SignedOut>
       <SignedIn>
-        <h3>
+        <h3 className="welcome-text">
           Welcome {user?.username}! <br />
           There are X boxes near you, full of items looking for a new home!
           {/* Replace X with number of boxes visible on map or within defaul search parameters */}
@@ -47,6 +49,7 @@ export function HomePage() {
           others to find your box! <br /> If you take something from a box, or
           notice something is already gone, please check it off the list! <br />
         </h3>
+        <MapLegend />
         <Map />
       </SignedIn>
     </>

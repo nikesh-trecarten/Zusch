@@ -1,0 +1,14 @@
+.map-legend {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  margin: 5px;
+}
+
+.map-legend-item {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  height: 41px;
+  align-items: center;
+}
