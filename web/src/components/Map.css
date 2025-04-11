@@ -1,3 +1,11 @@
 li {
   list-style: none;
 }
+
+.search {
+  justify-items: center;
+}
+
+input {
+  width: 300px;
+}

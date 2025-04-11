@@ -33,6 +33,7 @@ export function Map() {
   const [items, setItems] = useState<Item[]>([]);
   const [newItemName, setNewItemName] = useState("");
   const [zuschUserId, setZuschUserId] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -234,6 +235,16 @@ export function Map() {
     });
   };
 
+  const filteredBoxes = boxes.filter((box) => {
+    const itemsByBox = items.filter((item) => item.box_id === box.box_id);
+    if (!searchTerm.trim()) return true;
+    return itemsByBox.some(
+      (item) =>
+        !item.is_checked &&
+        item.item_name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
+
   return (
     <>
       <MapContainer
@@ -245,7 +256,7 @@ export function Map() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
-        {boxes.map((box) => {
+        {filteredBoxes.map((box) => {
           const itemsByBox = items.filter((item) => item.box_id === box.box_id);
           const isOwner = box.user_id === zuschUserId;
           return (
@@ -318,6 +329,29 @@ export function Map() {
         })}
         <AddUserBoxesOnClick />
       </MapContainer>
+      <div className="search">
+        <h3>
+          Looking for something specific? <br /> Type what you're looking for
+          below, to only see boxes containing that item!
+        </h3>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+          }}
+        >
+          <input
+            type="text"
+            name="items"
+            id="items"
+            placeholder="Search for boxes with this item..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <button type="button" onClick={() => setSearchTerm("")}>
+            Clear Search Field
+          </button>
+        </form>
+      </div>
     </>
   );
 }

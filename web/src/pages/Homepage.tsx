@@ -5,6 +5,7 @@ import { Header } from "../components/Header";
 
 export function HomePage() {
   const { user } = useUser();
+
   return (
     <>
       <Header />
@@ -47,16 +48,6 @@ export function HomePage() {
           notice something is already gone, please check it off the list! <br />
         </h3>
         <Map />
-        <div className="start">
-          <h3>
-            Looking for something specific? <br /> Type what you're looking for
-            below, to only see boxes containing that item!
-          </h3>
-          <form action="search">
-            <input type="text" name="items" id="items" />
-            <button>Search</button>
-          </form>
-        </div>
       </SignedIn>
     </>
   );
