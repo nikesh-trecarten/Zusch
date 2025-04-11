@@ -96,10 +96,6 @@ export function Map() {
     fetchUserLocation();
   }, [user]);
 
-  if (!mapCenter) {
-    return <div>Loading...</div>;
-  }
-
   useEffect(() => {
     async function fetchBoxes() {
       try {
@@ -288,6 +284,10 @@ export function Map() {
         item.item_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
+
+  if (!mapCenter) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <>
