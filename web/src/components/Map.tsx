@@ -65,7 +65,6 @@ export function Map() {
           params: { clerk_id: user?.id },
         });
         const userData = response.data;
-
         const address = `${userData.street} ${userData.house_number}, ${userData.postal_code} ${userData.city}, ${userData.country}`;
         const geoCodeRes = await axios.get(
           "https://nominatim.openstreetmap.org/search",

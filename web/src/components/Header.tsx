@@ -16,7 +16,7 @@ export function Header() {
           <Link to="/">Zusch!</Link>
         </h1>
         <SignedOut>
-          <div className="clerk-buttons">
+          <div className="corner-buttons">
             <SignInButton mode="modal">
               <h2>Sign In</h2>
             </SignInButton>
@@ -26,9 +26,15 @@ export function Header() {
           </div>
         </SignedOut>
         <SignedIn>
-          <SignOutButton>
-            <h2>Sign Out</h2>
-          </SignOutButton>
+          <div className="corner-buttons">
+            <Link to="/settings">
+              <h2>Settings</h2>
+              {/* Replace with appropriate icon in styling phase */}
+            </Link>
+            <SignOutButton>
+              <h2>Sign Out</h2>
+            </SignOutButton>
+          </div>
         </SignedIn>
       </div>
     </>

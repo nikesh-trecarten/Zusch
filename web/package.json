@@ -18,7 +18,8 @@
     "react-dom": "^19.0.0-rc.1",
     "react-leaflet": "^5.0.0-rc.2",
     "react-router": "^7.4.1",
-    "react-router-dom": "^7.4.1"
+    "react-router-dom": "^7.4.1",
+    "world-countries": "^5.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

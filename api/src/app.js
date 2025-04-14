@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const db = require("./util/db-connection.js");
+const { clerkMiddleware } = require("@clerk/express");
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -13,24 +14,14 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(clerkMiddleware);
+
 const requireAuth = (req, res, next) => {
   if (!req.auth.userId) {
     return next(new Error("Unauthenticated"));
   }
   next();
 };
-
-const decodeAuthHeaders = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-    req.auth = {};
-  } else {
-    req.auth = { userId: authHeader };
-  }
-  next();
-};
-
-app.use(decodeAuthHeaders);
 
 app.get("/", (req, res) => {
   return res.json({ msg: "API is up and running" });
@@ -106,7 +97,6 @@ app.post("/login", async (req, res) => {
 
 app.get("/users", async (req, res) => {
   try {
-    const { user_id } = req.params;
     const data = await db.select().from("users");
     res.json(data);
   } catch (error) {
@@ -125,6 +115,44 @@ app.get("/users/:clerk_id", async (req, res) => {
     res.json(data[0]);
   } catch (error) {
     console.error("Error fetching user:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.patch("/users/:clerk_id", requireAuth, async (req, res) => {
+  const { clerk_id } = req.params;
+  const { user_name, email, street, house_number, postal_code, city, country } =
+    req.body;
+  try {
+    const result = await db("users").where({ clerk_id }).update({
+      user_name,
+      email,
+      street,
+      house_number,
+      postal_code,
+      city,
+      country,
+    });
+    if (result === 0) {
+      return res.status(404).json({ error: "Unable to find user" });
+    }
+    res.json({ message: "User updated successfully" });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.delete("/users/:clerk_id", requireAuth, async (req, res) => {
+  const { clerk_id } = req.params;
+  try {
+    const result = await db("users").where({ clerk_id }).del();
+    if (result === 0) {
+      return res.status(404).json({ error: "Unable to find user" });
+    }
+    res.json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting user:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -178,25 +206,6 @@ app.post("/boxes", requireAuth, async (req, res) => {
   }
 });
 
-app.patch("/boxes", requireAuth, async (req, res) => {
-  const { userId } = req.auth;
-  const { box_id, location } = req.body;
-  try {
-    const result = await db("boxes")
-      .where({ box_id, user_id: userId })
-      .update({ location });
-    if (result === 0) {
-      return res
-        .status(404)
-        .json({ error: "Unable to find box for this user" });
-    }
-    res.json({ message: "Box moved successfully" });
-  } catch (error) {
-    console.error("Error moving box:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
 app.delete("/boxes/:box_id", requireAuth, async (req, res) => {
   const { userId } = req.auth;
   const { box_id } = req.params;
@@ -246,18 +255,32 @@ app.get("/boxes/:box_id/items/:item_id", async (req, res) => {
   }
 });
 
-app.post("/boxes/:box_id/items", async (req, res) => {
+app.post("/boxes/:box_id/items", requireAuth, async (req, res) => {
   const { box_id } = req.params;
   const { item_name } = req.body;
+  const { userId: clerk_id } = req.auth;
+
   try {
+    const user = await db("users")
+      .select("user_id")
+      .where({ clerk_id })
+      .first();
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const box = await db("boxes")
+      .where({ box_id, user_id: user.user_id })
+      .first();
+    if (!box) {
+      return res.status(404).json({ error: "Box not found" });
+    }
     const result = await db("items")
       .insert({
-        box_id: box_id,
+        box_id,
         item_name,
       })
       .returning("*");
-    const patchedResult = result[0];
-    res.json(patchedResult);
+    res.json(result[0]);
   } catch (error) {
     console.error("Error adding item to box:", error);
     res.status(500).json({ error: "Internal server error" });
