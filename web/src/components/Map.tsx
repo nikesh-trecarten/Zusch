@@ -9,7 +9,7 @@ import {
 } from "react-leaflet";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useUser } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
 
 const API_HOST = import.meta.env.VITE_API_HOST;
 
@@ -35,13 +35,18 @@ export function Map() {
   const [newItemName, setNewItemName] = useState("");
   const [zuschUserId, setZuschUserId] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const { getToken } = useAuth();
 
   useEffect(() => {
     const fetchUserId = async () => {
       if (!user?.id) return;
+      const token = await getToken();
       try {
         const response = await axios.get(`${API_HOST}/users/${user.id}`, {
           params: { clerk_id: user?.id },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
         if (response.data && response.data.user_id) {
           setZuschUserId(response.data.user_id);
@@ -101,7 +106,7 @@ export function Map() {
         const response = await axios.get(`${API_HOST}/boxes`);
         setBoxes(response.data);
       } catch (error) {
-        console.error("There was a problem fetching the boxes");
+        console.error("There was a problem fetching the boxes: ", error);
       }
     }
     fetchBoxes();

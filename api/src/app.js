@@ -23,11 +23,21 @@ const requireAuth = (req, res, next) => {
   next();
 };
 
+app.use((req, res, next) => {
+  if (req.auth && req.auth.userId) {
+    console.log("Authenticated user ID:", req.auth.userId);
+  } else {
+    console.log("No authenticated user");
+  }
+  next();
+});
+
 app.get("/", (req, res) => {
   return res.json({ msg: "API is up and running" });
 });
 
 app.post("/register", async (req, res) => {
+  clerk_id = req.auth.userId;
   const {
     clerk_id,
     user_name,
