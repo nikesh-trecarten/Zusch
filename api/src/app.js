@@ -14,7 +14,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(clerkMiddleware);
+app.use(clerkMiddleware());
 
 const requireAuth = (req, res, next) => {
   if (!req.auth.userId) {

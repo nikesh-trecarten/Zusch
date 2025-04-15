@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router";
 import { HomePage } from "./pages/HomePage.tsx";
 import { RegisterPage } from "./pages/RegisterPage.tsx";
 import { UserSettingsPage } from "./pages/UserSettingsPage.tsx";
+import { Provider } from "@/components/ui/provider";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -16,16 +17,18 @@ if (!PUBLISHABLE_KEY) {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl={"/"}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<App />}>
-            <Route index element={<HomePage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/settings" element={<UserSettingsPage />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </ClerkProvider>
+    <Provider>
+      <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl={"/"}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<App />}>
+              <Route index element={<HomePage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/settings" element={<UserSettingsPage />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </ClerkProvider>
+    </Provider>
   </StrictMode>
 );

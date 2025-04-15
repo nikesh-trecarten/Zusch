@@ -1,9 +1,11 @@
 import "./UserSettingsPage.css";
 import { Header } from "../components/Header";
 import countries from "world-countries";
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth, useUser } from "@clerk/clerk-react";
+import { Editable, IconButton } from "@chakra-ui/react";
+import { LuCheck, LuPencilLine, LuX } from "react-icons/lu";
 
 const API_HOST = import.meta.env.VITE_API_HOST;
 
@@ -15,67 +17,202 @@ export function UserSettingsPage() {
   const { getToken } = useAuth();
   const { user } = useUser();
   const clerk_id = user ? user.id : null;
-  const [formData, setFormData] = useState({
-    user_name: "",
-    email: "",
-    street: "",
-    house_number: "",
-    postal_code: "",
-    city: "",
-    country: "",
-  });
+  const [userName, setUserName] = useState("");
+  const [email, setEmail] = useState("");
+  const [street, setStreet] = useState("");
+  const [houseNumber, setHouseNumber] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [city, setCity] = useState("");
+  const [country, setCountry] = useState("");
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const updatedUserInfo = {
-      user_name: formData.user_name,
-      email: formData.email,
-      street: formData.street,
-      house_number: formData.house_number,
-      postal_code: formData.postal_code,
-      city: formData.city,
-      country: formData.country,
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      if (!clerk_id) {
+        alert("User ID not found. Please try again.");
+        return;
+      }
+      try {
+        const token = await getToken();
+        const response = await axios.get(`${API_HOST}/users/${clerk_id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const user = response.data;
+        setUserName(user.user_name);
+        setEmail(user.email);
+        setStreet(user.street);
+        setHouseNumber(user.house_number);
+        setPostalCode(user.postal_code);
+        setCity(user.city);
+        setCountry(user.country);
+      } catch (error) {
+        console.error("There was a problem fetching user info:", error);
+        alert("There was an error fetching user info, please try again.");
+      }
     };
-    console.log("Updated User Info:", updatedUserInfo);
+    if (user) {
+      fetchUserInfo();
+    }
+  }, [clerk_id, getToken]);
+
+  const handleUpdateUserName = async () => {
+    if (!clerk_id) {
+      alert("User ID not found. Please try again.");
+      return;
+    }
     try {
       const token = await getToken();
-      const response = await axios.patch(
+      if (userName !== user?.username) {
+        await user?.update({ username: userName });
+      }
+      await axios.patch(
         `${API_HOST}/users/${clerk_id}`,
-        updatedUserInfo,
+        {
+          user_name: userName,
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
           },
         }
       );
-      console.log("Form submitted successfully:", response.data);
     } catch (error) {
-      console.error("There was a problem submitting the form:", error);
-      alert("There was an error submitting the form. Please try again.");
+      console.error("There was a problem updating the username:", error);
+      alert("There was an error updating the username. Please try again.");
+    }
+  };
+
+  const handleUpdateEmail = async () => {
+    if (!user) {
+      alert("User not loaded. Please try again.");
+      return;
+    }
+    if (!clerk_id) {
+      alert("User ID not found. Please try again.");
+      return;
+    }
+    try {
+      const token = await getToken();
+
+      if (email === user.primaryEmailAddress?.emailAddress) {
+        alert("This is already your email address.");
+        return;
+      }
+
+      await user.update({ primaryEmailAddressId: email });
+      alert("Please check your email to verify your new email address.");
+      await axios.patch(
+        `${API_HOST}/users/${clerk_id}`,
+        {
+          email: email,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } catch (error) {
+      console.error("There was a problem updating the email:", error);
+      alert("There was an error updating the email. Please try again.");
+    }
+  };
+
+  const handleUpdateStreet = async () => {
+    if (!clerk_id) {
+      alert("User ID not found. Please try again.");
+      return;
+    }
+    try {
+      await axios.patch(`${API_HOST}/users/${clerk_id}`, {
+        street: street,
+      });
+    } catch (error) {
+      console.error("There was a problem updating the street:", error);
+      alert("There was an error updating the street. Please try again.");
+    }
+  };
+
+  const handleUpdateHouseNumber = async () => {
+    if (!clerk_id) {
+      alert("User ID not found. Please try again.");
+      return;
+    }
+    try {
+      await axios.patch(`${API_HOST}/users/${clerk_id}`, {
+        house_number: houseNumber,
+      });
+    } catch (error) {
+      console.error("There was a problem updating the house number:", error);
+      alert("There was an error updating the house number. Please try again.");
+    }
+  };
+
+  const handleUpdatePostalCode = async () => {
+    if (!clerk_id) {
+      alert("User ID not found. Please try again.");
+      return;
+    }
+    try {
+      await axios.patch(`${API_HOST}/users/${clerk_id}`, {
+        postal_code: postalCode,
+      });
+    } catch (error) {
+      console.error("There was a problem updating the postal code:", error);
+      alert("There was an error updating the postal code. Please try again.");
+    }
+  };
+
+  const handleUpdateCity = async () => {
+    if (!clerk_id) {
+      alert("User ID not found. Please try again.");
+      return;
+    }
+    try {
+      await axios.patch(`${API_HOST}/users/${clerk_id}`, {
+        city: city,
+      });
+    } catch (error) {
+      console.error("There was a problem updating the city:", error);
+      alert("There was an error updating the city. Please try again.");
+    }
+  };
+
+  const handleChangeCountry = async (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const { value } = e.target;
+    setCountry(value);
+    if (!clerk_id) {
+      alert("User ID not found. Please try again.");
+      return;
+    }
+    try {
+      await axios.patch(`${API_HOST}/users/${clerk_id}`, {
+        country: country,
+      });
+    } catch (error) {
+      console.error("There was a problem updating the country:", error);
+      alert("There was an error updating the country. Please try again.");
     }
   };
 
   const handleDeleteAccount = async () => {
+    if (!clerk_id) {
+      alert("User ID not found. Please try again.");
+      return;
+    }
     try {
       const token = await getToken();
-      const response = await axios.delete(`${API_HOST}/users/${clerk_id}`, {
+      await axios.delete(`${API_HOST}/users/${clerk_id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
-      console.log("Account deleted successfully:", response.data);
+      if (!user) {
+        alert("User not found.");
+        return;
+      }
+      await user.delete();
+      alert("Account deleted successfully.");
     } catch (error) {
       console.error("There was a problem deleting the account:", error);
       alert("There was an error deleting the account. Please try again.");
@@ -87,88 +224,183 @@ export function UserSettingsPage() {
       <Header />
       <h1>Settings</h1>
       <h2>User Information</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="username">Change Username</label>
-          <input
-            type="text"
-            placeholder="New Username"
-            id="username"
-            value={formData.user_name}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label htmlFor="email">Change Email</label>
-          <input
-            type="text"
-            placeholder="New Email"
-            id="email"
-            value={formData.email}
-            onChange={handleChange}
-          />
-        </div>
-        <p>this will have to be connected to Clerk somehow</p>
+      <label htmlFor="userName">Username</label>
+      <Editable.Root
+        value={userName}
+        onValueChange={(e) => setUserName(e.value)}
+        onSubmit={handleUpdateUserName}
+        placeholder="Enter new username"
+      >
+        <Editable.Preview />
+        <Editable.Input />
+        <Editable.Control>
+          <Editable.EditTrigger asChild>
+            <IconButton variant="ghost" size="xs">
+              <LuPencilLine />
+            </IconButton>
+          </Editable.EditTrigger>
+          <Editable.CancelTrigger asChild>
+            <IconButton variant="outline" size="xs">
+              <LuX />
+            </IconButton>
+          </Editable.CancelTrigger>
+          <Editable.SubmitTrigger asChild>
+            <IconButton variant="outline" size="xs">
+              <LuCheck />
+            </IconButton>
+          </Editable.SubmitTrigger>
+        </Editable.Control>
+      </Editable.Root>
+      <label htmlFor="email">Email Address</label>
+      <Editable.Root
+        value={email}
+        onValueChange={(e) => setEmail(e.value)}
+        onSubmit={handleUpdateEmail}
+        placeholder="Enter new email address"
+      >
+        <Editable.Preview />
+        <Editable.Input />
+        <Editable.Control>
+          <Editable.EditTrigger asChild>
+            <IconButton variant="ghost" size="xs">
+              <LuPencilLine />
+            </IconButton>
+          </Editable.EditTrigger>
+          <Editable.CancelTrigger asChild>
+            <IconButton variant="outline" size="xs">
+              <LuX />
+            </IconButton>
+          </Editable.CancelTrigger>
+          <Editable.SubmitTrigger asChild>
+            <IconButton variant="outline" size="xs">
+              <LuCheck />
+            </IconButton>
+          </Editable.SubmitTrigger>
+        </Editable.Control>
+      </Editable.Root>
+      <label htmlFor="street">Street</label>
+      <Editable.Root
+        value={street}
+        onValueChange={(e) => setStreet(e.value)}
+        onSubmit={handleUpdateStreet}
+        placeholder="Enter new street"
+      >
+        <Editable.Preview />
+        <Editable.Input />
+        <Editable.Control>
+          <Editable.EditTrigger asChild>
+            <IconButton variant="ghost" size="xs">
+              <LuPencilLine />
+            </IconButton>
+          </Editable.EditTrigger>
+          <Editable.CancelTrigger asChild>
+            <IconButton variant="outline" size="xs">
+              <LuX />
+            </IconButton>
+          </Editable.CancelTrigger>
+          <Editable.SubmitTrigger asChild>
+            <IconButton variant="outline" size="xs">
+              <LuCheck />
+            </IconButton>
+          </Editable.SubmitTrigger>
+        </Editable.Control>
+      </Editable.Root>
+      <label htmlFor="houseNumber">House Number</label>
+      <Editable.Root
+        value={houseNumber}
+        onValueChange={(e) => setHouseNumber(e.value)}
+        onSubmit={handleUpdateHouseNumber}
+        placeholder="Enter new house number"
+      >
+        <Editable.Preview />
+        <Editable.Input />
+        <Editable.Control>
+          <Editable.EditTrigger asChild>
+            <IconButton variant="ghost" size="xs">
+              <LuPencilLine />
+            </IconButton>
+          </Editable.EditTrigger>
+          <Editable.CancelTrigger asChild>
+            <IconButton variant="outline" size="xs">
+              <LuX />
+            </IconButton>
+          </Editable.CancelTrigger>
+          <Editable.SubmitTrigger asChild>
+            <IconButton variant="outline" size="xs">
+              <LuCheck />
+            </IconButton>
+          </Editable.SubmitTrigger>
+        </Editable.Control>
+      </Editable.Root>
+      <label htmlFor="postalCode">Postal Code</label>
+      <Editable.Root
+        value={postalCode}
+        onValueChange={(e) => setPostalCode(e.value)}
+        onSubmit={handleUpdatePostalCode}
+        placeholder="Enter new postal code"
+      >
+        <Editable.Preview />
+        <Editable.Input />
+        <Editable.Control>
+          <Editable.EditTrigger asChild>
+            <IconButton variant="ghost" size="xs">
+              <LuPencilLine />
+            </IconButton>
+          </Editable.EditTrigger>
+          <Editable.CancelTrigger asChild>
+            <IconButton variant="outline" size="xs">
+              <LuX />
+            </IconButton>
+          </Editable.CancelTrigger>
+          <Editable.SubmitTrigger asChild>
+            <IconButton variant="outline" size="xs">
+              <LuCheck />
+            </IconButton>
+          </Editable.SubmitTrigger>
+        </Editable.Control>
+      </Editable.Root>
+      <label htmlFor="city">City</label>
+      <Editable.Root
+        value={city}
+        onValueChange={(e) => setCity(e.value)}
+        onSubmit={handleUpdateCity}
+        placeholder="Enter new city"
+      >
+        <Editable.Preview />
+        <Editable.Input />
+        <Editable.Control>
+          <Editable.EditTrigger asChild>
+            <IconButton variant="ghost" size="xs">
+              <LuPencilLine />
+            </IconButton>
+          </Editable.EditTrigger>
+          <Editable.CancelTrigger asChild>
+            <IconButton variant="outline" size="xs">
+              <LuX />
+            </IconButton>
+          </Editable.CancelTrigger>
+          <Editable.SubmitTrigger asChild>
+            <IconButton variant="outline" size="xs">
+              <LuCheck />
+            </IconButton>
+          </Editable.SubmitTrigger>
+        </Editable.Control>
+      </Editable.Root>
+      <label htmlFor="country">Country</label>
+      <select
+        name="country"
+        id="country"
+        value={country}
+        onChange={handleChangeCountry}
+      >
+        <option value="">Select your country</option>
+        {countryList.map((country) => (
+          <option key={country.name} value={country.name}>
+            {country.name}
+          </option>
+        ))}
+      </select>
 
-        <div>
-          <label htmlFor="street">Street</label>
-          <input
-            type="text"
-            name="street"
-            id="street"
-            placeholder="New Street"
-            value={formData.street}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label htmlFor="house_number">House Number</label>
-          <input
-            type="text"
-            placeholder="New House Number"
-            id="house_number"
-            value={formData.house_number}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label htmlFor="postal_code">Postal Code</label>
-          <input
-            type="text"
-            placeholder="New Postal Code"
-            id="postal_code"
-            value={formData.postal_code}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label htmlFor="city">City</label>
-          <input
-            type="text"
-            placeholder="New City"
-            id="city"
-            value={formData.city}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label htmlFor="country">Country</label>
-          <select
-            name="country"
-            id="country"
-            value={formData.country}
-            onChange={handleChange}
-          >
-            <option value="">Select your country</option>
-            {countryList.map((country) => (
-              <option key={country.name} value={country.name}>
-                {country.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <button type="submit">Update User Info</button>
-      </form>
       <button onClick={handleDeleteAccount}>Delete Account</button>
     </>
   );
