@@ -21,14 +21,11 @@ app.get("/", (req, res) => {
 app.use(clerkMiddleware());
 
 const requireAuth = (req, res, next) => {
-  // console.log("Auth object:", req.auth);
-  // console.debug(req.auth);
   if (!req.auth.userId) {
     return next(new Error("Unauthenticated"));
   }
   next();
 };
-// app.use(requireAuth);
 
 app.use((req, res, next) => {
   if (req.auth && req.auth.userId) {
@@ -48,12 +45,7 @@ app.post("/register", requireAuth, async (req, res) => {
         .status(400)
         .json({ error: "Please fill in the form completely to register" });
     }
-    // const data = await db.select().from("users").where({ email }).first();
-    // if (data) {
-    //   return res.status(400).json({
-    //     error: "There is already an account using this email address.",
-    //   });
-    // }
+
     const newUser = await db("users")
       .insert({
         user_id,
@@ -68,37 +60,6 @@ app.post("/register", requireAuth, async (req, res) => {
   } catch (error) {
     console.error("Error creating user:", error);
     res.status(500).json({ error: "Failed to register user" });
-  }
-});
-
-// app.post("/login", async (req, res) => {
-//   const { email } = req.body;
-//   try {
-//     if (!email) {
-//       return res.status(400).json({ error: "Email is required" });
-//     }
-//     const data = await db.select().from("users").where({ email }).first();
-//     if (!data) {
-//       return res.status(404).json({ error: "User not found" });
-//     }
-//     res.json({ message: "Login successful" });
-//   } catch (error) {
-//     console.error("Error fetching user:", error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// });
-
-app.get("/all-users", async (req, res) => {
-  try {
-    // const user_id = req.auth.userId;
-    const data = await db.select().from("users"); //.where({ user_id });
-    if (data.length === 0) {
-      return res.status(404).json({ error: "Users not found" });
-    }
-    res.json(data);
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -137,20 +98,6 @@ app.patch("/user", requireAuth, async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
-// app.delete("/users", async (req, res) => {
-//   const user_id = req.auth.userId;
-//   try {
-//     const result = await db("users").where({ user_id }).del();
-//     if (result === 0) {
-//       return res.status(404).json({ error: "Unable to find user" });
-//     }
-//     res.json({ message: "User deleted successfully" });
-//   } catch (error) {
-//     console.error("Error deleting user:", error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// });
 
 app.get("/boxes", async (req, res) => {
   try {

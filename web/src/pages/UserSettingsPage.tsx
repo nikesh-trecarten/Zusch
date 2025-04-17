@@ -14,7 +14,6 @@ const countryList = countries.map((country) => ({
 
 export function UserSettingsPage() {
   const { user } = useUser();
-  const clerk_id = user ? user.id : null;
   const [street, setStreet] = useState("");
   const [houseNumber, setHouseNumber] = useState("");
   const [postalCode, setPostalCode] = useState("");
@@ -24,8 +23,8 @@ export function UserSettingsPage() {
 
   useEffect(() => {
     const fetchUserInfo = async () => {
-      if (!clerk_id) {
-        alert("User ID not found. Please try again.");
+      if (!user) {
+        alert("User not found. Please try again.");
         return;
       }
       try {
@@ -45,87 +44,33 @@ export function UserSettingsPage() {
     if (user) {
       fetchUserInfo();
     }
-  }, [clerk_id]);
+  }, [user]);
 
-  const handleUpdateStreet = async () => {
-    if (!clerk_id) {
-      alert("User ID not found. Please try again.");
+  const handleUpdateAddress = async () => {
+    if (!user) {
+      alert("User not found. Please try again.");
       return;
     }
-    try {
-      const headers = await getAuthHeader();
-      await axios.patch(`${API_HOST}/user`, { street: street }, { headers });
-    } catch (error) {
-      console.error("There was a problem updating the street:", error);
-      alert("There was an error updating the street. Please try again.");
-    }
-  };
-
-  const handleUpdateHouseNumber = async () => {
-    if (!clerk_id) {
-      alert("User ID not found. Please try again.");
+    if (!street || !houseNumber || !postalCode || !city || !country) {
+      alert("Please fill in all fields to update your address.");
       return;
     }
     try {
       const headers = await getAuthHeader();
       await axios.patch(
         `${API_HOST}/user`,
-        { house_number: houseNumber },
+        {
+          street: street,
+          house_number: houseNumber,
+          postal_code: postalCode,
+          city: city,
+          country: country,
+        },
         { headers }
       );
     } catch (error) {
-      console.error("There was a problem updating the house number:", error);
-      alert("There was an error updating the house number. Please try again.");
-    }
-  };
-
-  const handleUpdatePostalCode = async () => {
-    if (!clerk_id) {
-      alert("User ID not found. Please try again.");
-      return;
-    }
-    try {
-      const headers = await getAuthHeader();
-      await axios.patch(
-        `${API_HOST}/user`,
-        { postal_code: postalCode },
-        { headers }
-      );
-    } catch (error) {
-      console.error("There was a problem updating the postal code:", error);
-      alert("There was an error updating the postal code. Please try again.");
-    }
-  };
-
-  const handleUpdateCity = async () => {
-    if (!clerk_id) {
-      alert("User ID not found. Please try again.");
-      return;
-    }
-    try {
-      const headers = await getAuthHeader();
-      await axios.patch(`${API_HOST}/user`, { city: city }, { headers });
-    } catch (error) {
-      console.error("There was a problem updating the city:", error);
-      alert("There was an error updating the city. Please try again.");
-    }
-  };
-
-  const handleChangeCountry = async (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const { value } = e.target;
-    setCountry(value);
-    if (!clerk_id) {
-      alert("User ID not found. Please try again.");
-      return;
-    }
-    try {
-      const headers = await getAuthHeader();
-      await axios.patch(`${API_HOST}/user`, { country: country }, { headers });
-    } catch (error) {
-      console.error("There was a problem updating the country:", error);
-      alert("There was an error updating the country. Please try again.");
+      console.error("There was a problem updating the address:", error);
+      alert("There was an error updating the address. Please try again.");
     }
   };
 
@@ -139,26 +84,40 @@ export function UserSettingsPage() {
       </p>
       <form className="user-settings-form">
         <div>
-          <label htmlFor="street">Street: {street} </label>
-          <input type="text" placeholder="New Street" />
-          <button onSubmit={handleUpdateStreet}>Update Street</button>
+          <label htmlFor="street">Street: </label>
+          <input
+            type="text"
+            placeholder="New Street"
+            value={street}
+            onChange={(e) => setStreet(e.target.value)}
+          />
         </div>
         <div>
-          <label htmlFor="house_number">House Number: {houseNumber} </label>
-          <input type="text" placeholder="New House Number" />
-          <button onSubmit={handleUpdateHouseNumber}>
-            Update House Number
-          </button>
+          <label htmlFor="house_number">House Number: </label>
+          <input
+            type="text"
+            placeholder="New House Number"
+            value={houseNumber}
+            onChange={(e) => setHouseNumber(e.target.value)}
+          />
         </div>
         <div>
-          <label htmlFor="postal_code">Postal Code: {postalCode} </label>
-          <input type="text" placeholder="New Postal Code" />
-          <button onSubmit={handleUpdatePostalCode}>Update Postal Code</button>
+          <label htmlFor="postal_code">Postal Code: </label>
+          <input
+            type="text"
+            placeholder="New Postal Code"
+            value={postalCode}
+            onChange={(e) => setPostalCode(e.target.value)}
+          />
         </div>
         <div>
-          <label htmlFor="city">City: {city} </label>
-          <input type="text" placeholder="New City" />
-          <button onSubmit={handleUpdateCity}>Update City</button>
+          <label htmlFor="city">City: </label>
+          <input
+            type="text"
+            placeholder="New City"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+          />
         </div>
         <div>
           <label htmlFor="country">Country: </label>
@@ -166,7 +125,7 @@ export function UserSettingsPage() {
             name="country"
             id="country"
             value={country}
-            onChange={handleChangeCountry}
+            onChange={(e) => setCountry(e.target.value)}
           >
             <option value="">Select your country</option>
             {countryList.map((country) => (
@@ -176,6 +135,13 @@ export function UserSettingsPage() {
             ))}
           </select>
         </div>
+        <button
+          type="button"
+          onClick={handleUpdateAddress}
+          disabled={!street || !houseNumber || !postalCode || !city || !country}
+        >
+          Update Address
+        </button>
       </form>
     </>
   );

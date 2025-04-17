@@ -151,24 +151,6 @@ export function Map() {
           .catch((error) => {
             console.error("There was a problem adding the new box:", error);
           });
-
-        // const { lat, lng } = e.latlng;
-        // const newBox = {
-        //   location: `SRID=4326;POINT(${lng} ${lat})`,
-        // };
-        // const headers = await getAuthHeader();
-        // axios
-        //   .post(`${API_HOST}/boxes`, newBox, {
-        //     headers,
-        //   })
-        //   .then(() => {
-        //     axios.get(`${API_HOST}/boxes`).then((response) => {
-        //       setBoxes(response.data);
-        //     });
-        //   })
-        //   .catch((error) => {
-        //     console.error("There was a problem adding the new box:", error);
-        //   });
       },
     });
     return null;
@@ -242,10 +224,9 @@ export function Map() {
       return;
     }
     try {
+      const headers = await getAuthHeader();
       await axios.delete(`${API_HOST}/boxes/${box.box_id}`, {
-        headers: {
-          Authorization: user.id,
-        },
+        headers,
       });
       setBoxes((prevBoxes) => prevBoxes.filter((b) => b.box_id !== box.box_id));
       setItems((prevItems) =>
@@ -350,6 +331,7 @@ export function Map() {
                             textDecoration: item.is_checked
                               ? "line-through"
                               : "none",
+                            color: item.is_checked ? "grey" : "inherit",
                           }}
                         >
                           {item.item_name}
