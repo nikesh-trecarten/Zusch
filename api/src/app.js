@@ -19,9 +19,10 @@ app.get("/", (req, res) => {
 });
 
 app.use(clerkMiddleware());
+
 const requireAuth = (req, res, next) => {
-  console.log("Auth object:", req.auth);
-  console.debug(req.auth);
+  // console.log("Auth object:", req.auth);
+  // console.debug(req.auth);
   if (!req.auth.userId) {
     return next(new Error("Unauthenticated"));
   }
@@ -87,7 +88,7 @@ app.post("/register", requireAuth, async (req, res) => {
 //   }
 // });
 
-app.get("/users", async (req, res) => {
+app.get("/all-users", async (req, res) => {
   try {
     // const user_id = req.auth.userId;
     const data = await db.select().from("users"); //.where({ user_id });
@@ -101,7 +102,7 @@ app.get("/users", async (req, res) => {
   }
 });
 
-app.get("/users", requireAuth, async (req, res) => {
+app.get("/user", requireAuth, async (req, res) => {
   const user_id = req.auth.userId;
   try {
     const data = await db.select().from("users").where({ user_id });
@@ -115,7 +116,7 @@ app.get("/users", requireAuth, async (req, res) => {
   }
 });
 
-app.patch("/users", requireAuth, async (req, res) => {
+app.patch("/user", requireAuth, async (req, res) => {
   const user_id = req.auth.userId;
   const { street, house_number, postal_code, city, country } = req.body;
   try {
@@ -259,7 +260,6 @@ app.patch("/boxes/:box_id/items/:item_id", async (req, res) => {
   try {
     const { item_id } = req.params;
     const { is_checked } = req.body;
-
     const updated = await db("items")
       .where({ item_id })
       .update({ is_checked })

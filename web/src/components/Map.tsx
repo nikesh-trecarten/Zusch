@@ -11,6 +11,7 @@ import axios, { AxiosError, AxiosResponse } from "axios";
 import { useEffect, useState } from "react";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import { useNavigate } from "react-router";
+import { useAuthHeader } from "@/hooks";
 
 const API_HOST = import.meta.env.VITE_API_HOST;
 
@@ -37,12 +38,13 @@ export function Map() {
   const [searchTerm, setSearchTerm] = useState("");
   const { getToken } = useAuth();
   const navigate = useNavigate();
+  const { getAuthHeader } = useAuthHeader();
 
   useEffect(() => {
     const fetchUserLocation = async () => {
       try {
         const token = await getToken();
-        const response = await axios.get(`${API_HOST}/users`, {
+        const response = await axios.get(`${API_HOST}/user`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -78,7 +80,7 @@ export function Map() {
         const response = err.response as AxiosResponse;
         if (response.status === 404) {
           console.log("redirecting to register page");
-          navigate("/settings");
+          navigate("/register");
         }
         console.log(response);
         console.error("There was a problem fetching the user location:", error);
@@ -120,6 +122,19 @@ export function Map() {
     }
   }, [boxes]);
 
+  async function addAndUpdateBoxes(latlng: L.LatLng) {
+    const { lat, lng } = latlng;
+    const newBox = {
+      location: `SRID=4326;POINT(${lng} ${lat})`,
+    };
+    const headers = await getAuthHeader();
+    await axios.post(`${API_HOST}/boxes`, newBox, {
+      headers,
+    });
+    const response = await axios.get(`${API_HOST}/boxes`);
+    setBoxes(response.data);
+  }
+
   function AddUserBoxesOnClick() {
     useMapEvents({
       click(e) {
@@ -129,26 +144,31 @@ export function Map() {
           return;
         }
 
-        const { lat, lng } = e.latlng;
-
-        const newBox = {
-          location: `SRID=4326;POINT(${lng} ${lat})`,
-        };
-
-        axios
-          .post(`${API_HOST}/boxes`, newBox, {
-            headers: {
-              Authorization: user.id,
-            },
-          })
+        addAndUpdateBoxes(e.latlng)
           .then(() => {
-            axios.get(`${API_HOST}/boxes`).then((response) => {
-              setBoxes(response.data);
-            });
+            console.debug("then");
           })
           .catch((error) => {
             console.error("There was a problem adding the new box:", error);
           });
+
+        // const { lat, lng } = e.latlng;
+        // const newBox = {
+        //   location: `SRID=4326;POINT(${lng} ${lat})`,
+        // };
+        // const headers = await getAuthHeader();
+        // axios
+        //   .post(`${API_HOST}/boxes`, newBox, {
+        //     headers,
+        //   })
+        //   .then(() => {
+        //     axios.get(`${API_HOST}/boxes`).then((response) => {
+        //       setBoxes(response.data);
+        //     });
+        //   })
+        //   .catch((error) => {
+        //     console.error("There was a problem adding the new box:", error);
+        //   });
       },
     });
     return null;
@@ -171,14 +191,11 @@ export function Map() {
         box_id,
         item_name: newItemName,
       };
+      const headers = await getAuthHeader();
       const response = await axios.post(
         `${API_HOST}/boxes/${box_id}/items`,
         newItem,
-        {
-          headers: {
-            Authorization: user.id,
-          },
-        }
+        { headers }
       );
 
       const itemToBeAdded: Item = response.data;

@@ -1,9 +1,10 @@
-import "./UserSettingsPage.css";
-import { Header } from "../components/Header";
-import countries from "world-countries";
-import { useEffect, useState } from "react";
+import { useAuthHeader } from "@/hooks";
+import { useUser } from "@clerk/clerk-react";
 import axios from "axios";
-import { useAuth, useUser } from "@clerk/clerk-react";
+import { useEffect, useState } from "react";
+import countries from "world-countries";
+import { Header } from "../components/Header";
+import "./UserSettingsPage.css";
 
 const API_HOST = import.meta.env.VITE_API_HOST;
 
@@ -12,7 +13,6 @@ const countryList = countries.map((country) => ({
 }));
 
 export function UserSettingsPage() {
-  const { getToken } = useAuth();
   const { user } = useUser();
   const clerk_id = user ? user.id : null;
   const [street, setStreet] = useState("");
@@ -20,6 +20,7 @@ export function UserSettingsPage() {
   const [postalCode, setPostalCode] = useState("");
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("");
+  const { getAuthHeader } = useAuthHeader();
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -28,12 +29,8 @@ export function UserSettingsPage() {
         return;
       }
       try {
-        const token = await getToken();
-        const response = await axios.get(`${API_HOST}/users`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const headers = await getAuthHeader();
+        const response = await axios.get(`${API_HOST}/user`, { headers });
         const user = response.data;
         setStreet(user.street);
         setHouseNumber(user.house_number);
@@ -48,7 +45,7 @@ export function UserSettingsPage() {
     if (user) {
       fetchUserInfo();
     }
-  }, [clerk_id, getToken]);
+  }, [clerk_id]);
 
   const handleUpdateStreet = async () => {
     if (!clerk_id) {
@@ -56,9 +53,8 @@ export function UserSettingsPage() {
       return;
     }
     try {
-      await axios.patch(`${API_HOST}/users/${clerk_id}`, {
-        street: street,
-      });
+      const headers = await getAuthHeader();
+      await axios.patch(`${API_HOST}/user`, { street: street }, { headers });
     } catch (error) {
       console.error("There was a problem updating the street:", error);
       alert("There was an error updating the street. Please try again.");
@@ -71,9 +67,12 @@ export function UserSettingsPage() {
       return;
     }
     try {
-      await axios.patch(`${API_HOST}/users/${clerk_id}`, {
-        house_number: houseNumber,
-      });
+      const headers = await getAuthHeader();
+      await axios.patch(
+        `${API_HOST}/user`,
+        { house_number: houseNumber },
+        { headers }
+      );
     } catch (error) {
       console.error("There was a problem updating the house number:", error);
       alert("There was an error updating the house number. Please try again.");
@@ -86,9 +85,12 @@ export function UserSettingsPage() {
       return;
     }
     try {
-      await axios.patch(`${API_HOST}/users/${clerk_id}`, {
-        postal_code: postalCode,
-      });
+      const headers = await getAuthHeader();
+      await axios.patch(
+        `${API_HOST}/user`,
+        { postal_code: postalCode },
+        { headers }
+      );
     } catch (error) {
       console.error("There was a problem updating the postal code:", error);
       alert("There was an error updating the postal code. Please try again.");
@@ -101,9 +103,8 @@ export function UserSettingsPage() {
       return;
     }
     try {
-      await axios.patch(`${API_HOST}/users/${clerk_id}`, {
-        city: city,
-      });
+      const headers = await getAuthHeader();
+      await axios.patch(`${API_HOST}/user`, { city: city }, { headers });
     } catch (error) {
       console.error("There was a problem updating the city:", error);
       alert("There was an error updating the city. Please try again.");
@@ -120,9 +121,8 @@ export function UserSettingsPage() {
       return;
     }
     try {
-      await axios.patch(`${API_HOST}/users/${clerk_id}`, {
-        country: country,
-      });
+      const headers = await getAuthHeader();
+      await axios.patch(`${API_HOST}/user`, { country: country }, { headers });
     } catch (error) {
       console.error("There was a problem updating the country:", error);
       alert("There was an error updating the country. Please try again.");
