@@ -14,14 +14,20 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(clerkMiddleware());
+app.get("/", (req, res) => {
+  return res.json({ msg: "API is up and running" });
+});
 
+app.use(clerkMiddleware());
 const requireAuth = (req, res, next) => {
+  console.log("Auth object:", req.auth);
+  console.debug(req.auth);
   if (!req.auth.userId) {
     return next(new Error("Unauthenticated"));
   }
   next();
 };
+// app.use(requireAuth);
 
 app.use((req, res, next) => {
   if (req.auth && req.auth.userId) {
@@ -32,48 +38,24 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get("/", (req, res) => {
-  return res.json({ msg: "API is up and running" });
-});
-
-app.post("/register", async (req, res) => {
-  clerk_id = req.auth.userId;
-  const {
-    clerk_id,
-    user_name,
-    email,
-    street,
-    house_number,
-    postal_code,
-    city,
-    country,
-  } = req.body;
+app.post("/register", requireAuth, async (req, res) => {
+  const user_id = req.auth.userId;
+  const { street, house_number, postal_code, city, country } = req.body;
   try {
-    if (
-      !clerk_id ||
-      !user_name ||
-      !email ||
-      !street ||
-      !house_number ||
-      !postal_code ||
-      !city ||
-      !country
-    ) {
+    if (!street || !house_number || !postal_code || !city || !country) {
       return res
         .status(400)
         .json({ error: "Please fill in the form completely to register" });
     }
-    const data = await db.select().from("users").where({ email }).first();
-    if (data) {
-      return res.status(400).json({
-        error: "There is already an account using this email address.",
-      });
-    }
+    // const data = await db.select().from("users").where({ email }).first();
+    // if (data) {
+    //   return res.status(400).json({
+    //     error: "There is already an account using this email address.",
+    //   });
+    // }
     const newUser = await db("users")
       .insert({
-        clerk_id,
-        user_name,
-        email,
+        user_id,
         street,
         house_number,
         postal_code,
@@ -88,37 +70,41 @@ app.post("/register", async (req, res) => {
   }
 });
 
-app.post("/login", async (req, res) => {
-  const { email } = req.body;
-  try {
-    if (!email) {
-      return res.status(400).json({ error: "Email is required" });
-    }
-    const data = await db.select().from("users").where({ email }).first();
-    if (!data) {
-      return res.status(404).json({ error: "User not found" });
-    }
-    res.json({ message: "Login successful" });
-  } catch (error) {
-    console.error("Error fetching user:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+// app.post("/login", async (req, res) => {
+//   const { email } = req.body;
+//   try {
+//     if (!email) {
+//       return res.status(400).json({ error: "Email is required" });
+//     }
+//     const data = await db.select().from("users").where({ email }).first();
+//     if (!data) {
+//       return res.status(404).json({ error: "User not found" });
+//     }
+//     res.json({ message: "Login successful" });
+//   } catch (error) {
+//     console.error("Error fetching user:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
 
 app.get("/users", async (req, res) => {
   try {
-    const data = await db.select().from("users");
+    // const user_id = req.auth.userId;
+    const data = await db.select().from("users"); //.where({ user_id });
+    if (data.length === 0) {
+      return res.status(404).json({ error: "Users not found" });
+    }
     res.json(data);
   } catch (error) {
-    console.error("Error fetching user:", error);
+    console.error("Error fetching users:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-app.get("/users/:clerk_id", async (req, res) => {
+app.get("/users", requireAuth, async (req, res) => {
+  const user_id = req.auth.userId;
   try {
-    const { clerk_id } = req.params;
-    const data = await db.select().from("users").where({ clerk_id });
+    const data = await db.select().from("users").where({ user_id });
     if (data.length === 0) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -129,20 +115,18 @@ app.get("/users/:clerk_id", async (req, res) => {
   }
 });
 
-app.patch("/users/:clerk_id", requireAuth, async (req, res) => {
-  const { clerk_id } = req.params;
-  const { user_name, email, street, house_number, postal_code, city, country } =
-    req.body;
+app.patch("/users", requireAuth, async (req, res) => {
+  const user_id = req.auth.userId;
+  const { street, house_number, postal_code, city, country } = req.body;
   try {
-    const result = await db("users").where({ clerk_id }).update({
-      user_name,
-      email,
-      street,
-      house_number,
-      postal_code,
-      city,
-      country,
-    });
+    const updates = {};
+    if (street) updates.street = street;
+    if (house_number) updates.house_number = house_number;
+    if (postal_code) updates.postal_code = postal_code;
+    if (city) updates.city = city;
+    if (country) updates.country = country;
+
+    const result = await db("users").where({ user_id }).update(updates);
     if (result === 0) {
       return res.status(404).json({ error: "Unable to find user" });
     }
@@ -153,19 +137,19 @@ app.patch("/users/:clerk_id", requireAuth, async (req, res) => {
   }
 });
 
-app.delete("/users/:clerk_id", requireAuth, async (req, res) => {
-  const { clerk_id } = req.params;
-  try {
-    const result = await db("users").where({ clerk_id }).del();
-    if (result === 0) {
-      return res.status(404).json({ error: "Unable to find user" });
-    }
-    res.json({ message: "User deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting user:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+// app.delete("/users", async (req, res) => {
+//   const user_id = req.auth.userId;
+//   try {
+//     const result = await db("users").where({ user_id }).del();
+//     if (result === 0) {
+//       return res.status(404).json({ error: "Unable to find user" });
+//     }
+//     res.json({ message: "User deleted successfully" });
+//   } catch (error) {
+//     console.error("Error deleting user:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
 
 app.get("/boxes", async (req, res) => {
   try {
@@ -192,19 +176,9 @@ app.get("/boxes/:box_id", async (req, res) => {
 });
 
 app.post("/boxes", requireAuth, async (req, res) => {
-  const { userId: clerk_id } = req.auth;
+  const user_id = req.auth.userId;
   const { location } = req.body;
   try {
-    const zuschUserId = await db("users")
-      .select("user_id")
-      .where({ clerk_id })
-      .first();
-    if (!zuschUserId) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    const { user_id } = zuschUserId;
-
     await db("boxes").insert({
       user_id,
       location,
@@ -217,17 +191,9 @@ app.post("/boxes", requireAuth, async (req, res) => {
 });
 
 app.delete("/boxes/:box_id", requireAuth, async (req, res) => {
-  const { userId } = req.auth;
+  const user_id = req.auth.userId;
   const { box_id } = req.params;
   try {
-    const user = await db("users")
-      .select("user_id")
-      .where({ clerk_id: userId })
-      .first();
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-    const { user_id } = user;
     const result = await db("boxes").where({ box_id, user_id }).del();
     if (result === 0) {
       return res
@@ -237,6 +203,7 @@ app.delete("/boxes/:box_id", requireAuth, async (req, res) => {
     res.json({ message: "Box deleted" });
   } catch (error) {
     console.error("Error deleting box:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -266,21 +233,12 @@ app.get("/boxes/:box_id/items/:item_id", async (req, res) => {
 });
 
 app.post("/boxes/:box_id/items", requireAuth, async (req, res) => {
+  const user_id = req.auth.userId;
   const { box_id } = req.params;
   const { item_name } = req.body;
-  const { userId: clerk_id } = req.auth;
 
   try {
-    const user = await db("users")
-      .select("user_id")
-      .where({ clerk_id })
-      .first();
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-    const box = await db("boxes")
-      .where({ box_id, user_id: user.user_id })
-      .first();
+    const box = await db("boxes").where({ box_id, user_id }).first();
     if (!box) {
       return res.status(404).json({ error: "Box not found" });
     }

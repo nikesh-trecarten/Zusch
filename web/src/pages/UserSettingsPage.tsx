@@ -4,8 +4,6 @@ import countries from "world-countries";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth, useUser } from "@clerk/clerk-react";
-import { Editable, IconButton } from "@chakra-ui/react";
-import { LuCheck, LuPencilLine, LuX } from "react-icons/lu";
 
 const API_HOST = import.meta.env.VITE_API_HOST;
 
@@ -17,8 +15,6 @@ export function UserSettingsPage() {
   const { getToken } = useAuth();
   const { user } = useUser();
   const clerk_id = user ? user.id : null;
-  const [userName, setUserName] = useState("");
-  const [email, setEmail] = useState("");
   const [street, setStreet] = useState("");
   const [houseNumber, setHouseNumber] = useState("");
   const [postalCode, setPostalCode] = useState("");
@@ -33,14 +29,12 @@ export function UserSettingsPage() {
       }
       try {
         const token = await getToken();
-        const response = await axios.get(`${API_HOST}/users/${clerk_id}`, {
+        const response = await axios.get(`${API_HOST}/users`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
         const user = response.data;
-        setUserName(user.user_name);
-        setEmail(user.email);
         setStreet(user.street);
         setHouseNumber(user.house_number);
         setPostalCode(user.postal_code);
@@ -55,65 +49,6 @@ export function UserSettingsPage() {
       fetchUserInfo();
     }
   }, [clerk_id, getToken]);
-
-  const handleUpdateUserName = async () => {
-    if (!clerk_id) {
-      alert("User ID not found. Please try again.");
-      return;
-    }
-    try {
-      const token = await getToken();
-      if (userName !== user?.username) {
-        await user?.update({ username: userName });
-      }
-      await axios.patch(
-        `${API_HOST}/users/${clerk_id}`,
-        {
-          user_name: userName,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-    } catch (error) {
-      console.error("There was a problem updating the username:", error);
-      alert("There was an error updating the username. Please try again.");
-    }
-  };
-
-  const handleUpdateEmail = async () => {
-    if (!user) {
-      alert("User not loaded. Please try again.");
-      return;
-    }
-    if (!clerk_id) {
-      alert("User ID not found. Please try again.");
-      return;
-    }
-    try {
-      const token = await getToken();
-
-      if (email === user.primaryEmailAddress?.emailAddress) {
-        alert("This is already your email address.");
-        return;
-      }
-
-      await user.update({ primaryEmailAddressId: email });
-      alert("Please check your email to verify your new email address.");
-      await axios.patch(
-        `${API_HOST}/users/${clerk_id}`,
-        {
-          email: email,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-    } catch (error) {
-      console.error("There was a problem updating the email:", error);
-      alert("There was an error updating the email. Please try again.");
-    }
-  };
 
   const handleUpdateStreet = async () => {
     if (!clerk_id) {
@@ -194,214 +129,54 @@ export function UserSettingsPage() {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    if (!clerk_id) {
-      alert("User ID not found. Please try again.");
-      return;
-    }
-    try {
-      const token = await getToken();
-      await axios.delete(`${API_HOST}/users/${clerk_id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      if (!user) {
-        alert("User not found.");
-        return;
-      }
-      await user.delete();
-      alert("Account deleted successfully.");
-    } catch (error) {
-      console.error("There was a problem deleting the account:", error);
-      alert("There was an error deleting the account. Please try again.");
-    }
-  };
-
   return (
     <>
       <Header />
       <h1>Settings</h1>
-      <h2>User Information</h2>
-      <label htmlFor="userName">Username</label>
-      <Editable.Root
-        value={userName}
-        onValueChange={(e) => setUserName(e.value)}
-        onSubmit={handleUpdateUserName}
-        placeholder="Enter new username"
-      >
-        <Editable.Preview />
-        <Editable.Input />
-        <Editable.Control>
-          <Editable.EditTrigger asChild>
-            <IconButton variant="ghost" size="xs">
-              <LuPencilLine />
-            </IconButton>
-          </Editable.EditTrigger>
-          <Editable.CancelTrigger asChild>
-            <IconButton variant="outline" size="xs">
-              <LuX />
-            </IconButton>
-          </Editable.CancelTrigger>
-          <Editable.SubmitTrigger asChild>
-            <IconButton variant="outline" size="xs">
-              <LuCheck />
-            </IconButton>
-          </Editable.SubmitTrigger>
-        </Editable.Control>
-      </Editable.Root>
-      <label htmlFor="email">Email Address</label>
-      <Editable.Root
-        value={email}
-        onValueChange={(e) => setEmail(e.value)}
-        onSubmit={handleUpdateEmail}
-        placeholder="Enter new email address"
-      >
-        <Editable.Preview />
-        <Editable.Input />
-        <Editable.Control>
-          <Editable.EditTrigger asChild>
-            <IconButton variant="ghost" size="xs">
-              <LuPencilLine />
-            </IconButton>
-          </Editable.EditTrigger>
-          <Editable.CancelTrigger asChild>
-            <IconButton variant="outline" size="xs">
-              <LuX />
-            </IconButton>
-          </Editable.CancelTrigger>
-          <Editable.SubmitTrigger asChild>
-            <IconButton variant="outline" size="xs">
-              <LuCheck />
-            </IconButton>
-          </Editable.SubmitTrigger>
-        </Editable.Control>
-      </Editable.Root>
-      <label htmlFor="street">Street</label>
-      <Editable.Root
-        value={street}
-        onValueChange={(e) => setStreet(e.value)}
-        onSubmit={handleUpdateStreet}
-        placeholder="Enter new street"
-      >
-        <Editable.Preview />
-        <Editable.Input />
-        <Editable.Control>
-          <Editable.EditTrigger asChild>
-            <IconButton variant="ghost" size="xs">
-              <LuPencilLine />
-            </IconButton>
-          </Editable.EditTrigger>
-          <Editable.CancelTrigger asChild>
-            <IconButton variant="outline" size="xs">
-              <LuX />
-            </IconButton>
-          </Editable.CancelTrigger>
-          <Editable.SubmitTrigger asChild>
-            <IconButton variant="outline" size="xs">
-              <LuCheck />
-            </IconButton>
-          </Editable.SubmitTrigger>
-        </Editable.Control>
-      </Editable.Root>
-      <label htmlFor="houseNumber">House Number</label>
-      <Editable.Root
-        value={houseNumber}
-        onValueChange={(e) => setHouseNumber(e.value)}
-        onSubmit={handleUpdateHouseNumber}
-        placeholder="Enter new house number"
-      >
-        <Editable.Preview />
-        <Editable.Input />
-        <Editable.Control>
-          <Editable.EditTrigger asChild>
-            <IconButton variant="ghost" size="xs">
-              <LuPencilLine />
-            </IconButton>
-          </Editable.EditTrigger>
-          <Editable.CancelTrigger asChild>
-            <IconButton variant="outline" size="xs">
-              <LuX />
-            </IconButton>
-          </Editable.CancelTrigger>
-          <Editable.SubmitTrigger asChild>
-            <IconButton variant="outline" size="xs">
-              <LuCheck />
-            </IconButton>
-          </Editable.SubmitTrigger>
-        </Editable.Control>
-      </Editable.Root>
-      <label htmlFor="postalCode">Postal Code</label>
-      <Editable.Root
-        value={postalCode}
-        onValueChange={(e) => setPostalCode(e.value)}
-        onSubmit={handleUpdatePostalCode}
-        placeholder="Enter new postal code"
-      >
-        <Editable.Preview />
-        <Editable.Input />
-        <Editable.Control>
-          <Editable.EditTrigger asChild>
-            <IconButton variant="ghost" size="xs">
-              <LuPencilLine />
-            </IconButton>
-          </Editable.EditTrigger>
-          <Editable.CancelTrigger asChild>
-            <IconButton variant="outline" size="xs">
-              <LuX />
-            </IconButton>
-          </Editable.CancelTrigger>
-          <Editable.SubmitTrigger asChild>
-            <IconButton variant="outline" size="xs">
-              <LuCheck />
-            </IconButton>
-          </Editable.SubmitTrigger>
-        </Editable.Control>
-      </Editable.Root>
-      <label htmlFor="city">City</label>
-      <Editable.Root
-        value={city}
-        onValueChange={(e) => setCity(e.value)}
-        onSubmit={handleUpdateCity}
-        placeholder="Enter new city"
-      >
-        <Editable.Preview />
-        <Editable.Input />
-        <Editable.Control>
-          <Editable.EditTrigger asChild>
-            <IconButton variant="ghost" size="xs">
-              <LuPencilLine />
-            </IconButton>
-          </Editable.EditTrigger>
-          <Editable.CancelTrigger asChild>
-            <IconButton variant="outline" size="xs">
-              <LuX />
-            </IconButton>
-          </Editable.CancelTrigger>
-          <Editable.SubmitTrigger asChild>
-            <IconButton variant="outline" size="xs">
-              <LuCheck />
-            </IconButton>
-          </Editable.SubmitTrigger>
-        </Editable.Control>
-      </Editable.Root>
-      <label htmlFor="country">Country</label>
-      <select
-        name="country"
-        id="country"
-        value={country}
-        onChange={handleChangeCountry}
-      >
-        <option value="">Select your country</option>
-        {countryList.map((country) => (
-          <option key={country.name} value={country.name}>
-            {country.name}
-          </option>
-        ))}
-      </select>
-
-      <button onClick={handleDeleteAccount}>Delete Account</button>
+      <h2>User Address</h2>
+      <p>
+        Please note that a valid address is required for Zusch! to run properly.
+      </p>
+      <form className="user-settings-form">
+        <div>
+          <label htmlFor="street">Street: {street} </label>
+          <input type="text" placeholder="New Street" />
+          <button onSubmit={handleUpdateStreet}>Update Street</button>
+        </div>
+        <div>
+          <label htmlFor="house_number">House Number: {houseNumber} </label>
+          <input type="text" placeholder="New House Number" />
+          <button onSubmit={handleUpdateHouseNumber}>
+            Update House Number
+          </button>
+        </div>
+        <div>
+          <label htmlFor="postal_code">Postal Code: {postalCode} </label>
+          <input type="text" placeholder="New Postal Code" />
+          <button onSubmit={handleUpdatePostalCode}>Update Postal Code</button>
+        </div>
+        <div>
+          <label htmlFor="city">City: {city} </label>
+          <input type="text" placeholder="New City" />
+          <button onSubmit={handleUpdateCity}>Update City</button>
+        </div>
+        <div>
+          <label htmlFor="country">Country: </label>
+          <select
+            name="country"
+            id="country"
+            value={country}
+            onChange={handleChangeCountry}
+          >
+            <option value="">Select your country</option>
+            {countryList.map((country) => (
+              <option key={country.name} value={country.name}>
+                {country.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </form>
     </>
   );
 }

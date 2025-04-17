@@ -37,9 +37,7 @@ export function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const newUserInfo = {
-      clerk_id: user?.id,
-      user_name: user?.username,
-      email: user?.emailAddresses[0].emailAddress,
+      user_id: user?.id,
       ...formData,
     };
     try {
@@ -62,7 +60,10 @@ export function RegisterPage() {
     <>
       <h1>You're almost ready!</h1>
       <div className="address-form">
-        <h3>Please provide your address below to start using Zusch!</h3>
+        <h3>
+          A valid address is required for Zusch! to work properly. <br />
+          Please provide your address below to start using Zusch!
+        </h3>
         <form onSubmit={handleSubmit}>
           <div>
             <label htmlFor="street">Street</label>

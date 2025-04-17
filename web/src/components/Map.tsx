@@ -7,15 +7,16 @@ import {
   Marker,
   useMapEvents,
 } from "react-leaflet";
-import axios from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import { useEffect, useState } from "react";
 import { useAuth, useUser } from "@clerk/clerk-react";
+import { useNavigate } from "react-router";
 
 const API_HOST = import.meta.env.VITE_API_HOST;
 
 interface Box {
   box_id: number;
-  user_id: number;
+  user_id: string;
   latitude: number;
   longitude: number;
 }
@@ -33,42 +34,22 @@ export function Map() {
   const [boxes, setBoxes] = useState<Box[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [newItemName, setNewItemName] = useState("");
-  const [zuschUserId, setZuschUserId] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const { getToken } = useAuth();
-
-  useEffect(() => {
-    const fetchUserId = async () => {
-      if (!user?.id) return;
-      const token = await getToken();
-      try {
-        const response = await axios.get(`${API_HOST}/users/${user.id}`, {
-          params: { clerk_id: user?.id },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (response.data && response.data.user_id) {
-          setZuschUserId(response.data.user_id);
-        } else {
-          console.warn("User not found or invalid clerk_id");
-        }
-      } catch (error) {
-        console.error("There was a problem fetching the user ID:", error);
-      }
-    };
-    if (user) {
-      fetchUserId();
-    }
-  }, [user]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserLocation = async () => {
-      if (!user?.id) return;
       try {
-        const response = await axios.get(`${API_HOST}/users/${user.id}`, {
-          params: { clerk_id: user?.id },
+        const token = await getToken();
+        const response = await axios.get(`${API_HOST}/users`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         });
+
+        console.log("User Data: ", response.data);
         const userData = response.data;
         const address = `${userData.street} ${userData.house_number}, ${userData.postal_code} ${userData.city}, ${userData.country}`;
         const geoCodeRes = await axios.get(
@@ -93,6 +74,13 @@ export function Map() {
           );
         }
       } catch (error) {
+        const err = error as AxiosError;
+        const response = err.response as AxiosResponse;
+        if (response.status === 404) {
+          console.log("redirecting to register page");
+          navigate("/settings");
+        }
+        console.log(response);
         console.error("There was a problem fetching the user location:", error);
       }
     };
@@ -253,7 +241,7 @@ export function Map() {
 
   const getIconColor = (box: Box) => {
     const itemsByBox = items.filter((item) => item.box_id === box.box_id);
-    const isOwner = box.user_id === zuschUserId;
+    const isOwner = box.user_id === user?.id;
     const isEmptyOrAllChecked =
       itemsByBox.length === 0 || itemsByBox.every((item) => item.is_checked);
 
@@ -290,7 +278,15 @@ export function Map() {
   });
 
   if (!mapCenter) {
-    return <div>Loading...</div>;
+    return (
+      <div>
+        Loading Map... <br />
+        By the time you finish reading this, you should see the map. If you are
+        still reading this message, it means we are having trouble getting your
+        location. If you can still read this, please click on the blue house
+        icon in the top right corner to go to reset your address.
+      </div>
+    );
   }
 
   return (
@@ -306,7 +302,7 @@ export function Map() {
         />
         {filteredBoxes.map((box) => {
           const itemsByBox = items.filter((item) => item.box_id === box.box_id);
-          const isOwner = box.user_id === zuschUserId;
+          const isOwner = box.user_id === user?.id;
           return (
             <Marker
               key={box.box_id}

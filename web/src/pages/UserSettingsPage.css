@@ -1,3 +1,4 @@
-/* body {
-  background-color: rgb(140, 224, 140);
-} */
+.user-settings-form select {
+  width: 200px;
+  justify-items: center;
+}

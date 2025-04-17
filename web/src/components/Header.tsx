@@ -6,6 +6,7 @@ import {
   SignInButton,
   SignUpButton,
   SignOutButton,
+  UserButton,
 } from "@clerk/clerk-react";
 
 export function Header() {
@@ -13,7 +14,7 @@ export function Header() {
     <>
       <div className="header">
         <h1>
-          <Link to="/">Zusch!</Link>
+          <Link to="/">Z!</Link>
         </h1>
         <SignedOut>
           <div className="corner-buttons">
@@ -27,9 +28,13 @@ export function Header() {
         </SignedOut>
         <SignedIn>
           <div className="corner-buttons">
+            <UserButton />
             <Link to="/settings">
-              <h2>Settings</h2>
-              {/* Replace with appropriate icon in styling phase */}
+              <img
+                className="user-settings-link"
+                src="home-button.png"
+                alt="user settings link"
+              />
             </Link>
             <SignOutButton>
               <h2>Sign Out</h2>
