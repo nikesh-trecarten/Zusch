@@ -122,7 +122,7 @@ export function Map() {
     }
   }, [boxes]);
 
-  async function addAndUpdateBoxes(latlng: L.LatLng) {
+  async function addBox(latlng: L.LatLng) {
     const { lat, lng } = latlng;
     const newBox = {
       location: `SRID=4326;POINT(${lng} ${lat})`,
@@ -135,7 +135,7 @@ export function Map() {
     setBoxes(response.data);
   }
 
-  function AddUserBoxesOnClick() {
+  function AddBoxOnClick() {
     useMapEvents({
       click(e) {
         if (!user) {
@@ -144,7 +144,7 @@ export function Map() {
           return;
         }
 
-        addAndUpdateBoxes(e.latlng)
+        addBox(e.latlng)
           .then(() => {
             console.debug("then");
           })
@@ -370,7 +370,7 @@ export function Map() {
             </Marker>
           );
         })}
-        <AddUserBoxesOnClick />
+        <AddBoxOnClick />
       </MapContainer>
       <div className="search">
         <h3>

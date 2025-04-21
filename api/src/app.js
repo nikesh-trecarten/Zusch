@@ -28,7 +28,7 @@ const requireAuth = (req, res, next) => {
 };
 
 app.use((req, res, next) => {
-  if (req.auth && req.auth.userId) {
+  if (req.auth?.userId) {
     console.log("Authenticated user ID:", req.auth.userId);
   } else {
     console.log("No authenticated user");
@@ -81,12 +81,15 @@ app.patch("/user", requireAuth, async (req, res) => {
   const user_id = req.auth.userId;
   const { street, house_number, postal_code, city, country } = req.body;
   try {
-    const updates = {};
-    if (street) updates.street = street;
-    if (house_number) updates.house_number = house_number;
-    if (postal_code) updates.postal_code = postal_code;
-    if (city) updates.city = city;
-    if (country) updates.country = country;
+    const updates = Object.fromEntries(
+      Object.entries({
+        street,
+        house_number,
+        postal_code,
+        city,
+        country,
+      }).filter(([_, value]) => value !== undefined)
+    );
 
     const result = await db("users").where({ user_id }).update(updates);
     if (result === 0) {
