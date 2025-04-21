@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const db = require("./util/db-connection.js");
+const { clerkMiddleware } = require("@clerk/express");
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -13,6 +14,12 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get("/", (req, res) => {
+  return res.json({ msg: "API is up and running" });
+});
+
+app.use(clerkMiddleware());
+
 const requireAuth = (req, res, next) => {
   if (!req.auth.userId) {
     return next(new Error("Unauthenticated"));
@@ -20,59 +27,28 @@ const requireAuth = (req, res, next) => {
   next();
 };
 
-const decodeAuthHeaders = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-    req.auth = {};
+app.use((req, res, next) => {
+  if (req.auth?.userId) {
+    console.log("Authenticated user ID:", req.auth.userId);
   } else {
-    req.auth = { userId: authHeader };
+    console.log("No authenticated user");
   }
   next();
-};
-
-app.use(decodeAuthHeaders);
-
-app.get("/", (req, res) => {
-  return res.json({ msg: "API is up and running" });
 });
 
-app.post("/register", async (req, res) => {
-  const {
-    clerk_id,
-    user_name,
-    email,
-    street,
-    house_number,
-    postal_code,
-    city,
-    country,
-  } = req.body;
+app.post("/register", requireAuth, async (req, res) => {
+  const user_id = req.auth.userId;
+  const { street, house_number, postal_code, city, country } = req.body;
   try {
-    if (
-      !clerk_id ||
-      !user_name ||
-      !email ||
-      !street ||
-      !house_number ||
-      !postal_code ||
-      !city ||
-      !country
-    ) {
+    if (!street || !house_number || !postal_code || !city || !country) {
       return res
         .status(400)
         .json({ error: "Please fill in the form completely to register" });
     }
-    const data = await db.select().from("users").where({ email }).first();
-    if (data) {
-      return res.status(400).json({
-        error: "There is already an account using this email address.",
-      });
-    }
+
     const newUser = await db("users")
       .insert({
-        clerk_id,
-        user_name,
-        email,
+        user_id,
         street,
         house_number,
         postal_code,
@@ -87,44 +63,41 @@ app.post("/register", async (req, res) => {
   }
 });
 
-app.post("/login", async (req, res) => {
-  const { email } = req.body;
+app.get("/user", requireAuth, async (req, res) => {
+  const user_id = req.auth.userId;
   try {
-    if (!email) {
-      return res.status(400).json({ error: "Email is required" });
-    }
-    const data = await db.select().from("users").where({ email }).first();
-    if (!data) {
-      return res.status(404).json({ error: "User not found" });
-    }
-    res.json({ message: "Login successful" });
-  } catch (error) {
-    console.error("Error fetching user:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-app.get("/users", async (req, res) => {
-  try {
-    const { user_id } = req.params;
-    const data = await db.select().from("users");
-    res.json(data);
-  } catch (error) {
-    console.error("Error fetching user:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-app.get("/users/:clerk_id", async (req, res) => {
-  try {
-    const { clerk_id } = req.params;
-    const data = await db.select().from("users").where({ clerk_id });
+    const data = await db.select().from("users").where({ user_id });
     if (data.length === 0) {
       return res.status(404).json({ error: "User not found" });
     }
     res.json(data[0]);
   } catch (error) {
     console.error("Error fetching user:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.patch("/user", requireAuth, async (req, res) => {
+  const user_id = req.auth.userId;
+  const { street, house_number, postal_code, city, country } = req.body;
+  try {
+    const updates = Object.fromEntries(
+      Object.entries({
+        street,
+        house_number,
+        postal_code,
+        city,
+        country,
+      }).filter(([_, value]) => value !== undefined)
+    );
+
+    const result = await db("users").where({ user_id }).update(updates);
+    if (result === 0) {
+      return res.status(404).json({ error: "Unable to find user" });
+    }
+    res.json({ message: "User updated successfully" });
+  } catch (error) {
+    console.error("Error updating user:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -154,19 +127,9 @@ app.get("/boxes/:box_id", async (req, res) => {
 });
 
 app.post("/boxes", requireAuth, async (req, res) => {
-  const { userId: clerk_id } = req.auth;
+  const user_id = req.auth.userId;
   const { location } = req.body;
   try {
-    const zuschUserId = await db("users")
-      .select("user_id")
-      .where({ clerk_id })
-      .first();
-    if (!zuschUserId) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    const { user_id } = zuschUserId;
-
     await db("boxes").insert({
       user_id,
       location,
@@ -178,37 +141,10 @@ app.post("/boxes", requireAuth, async (req, res) => {
   }
 });
 
-app.patch("/boxes", requireAuth, async (req, res) => {
-  const { userId } = req.auth;
-  const { box_id, location } = req.body;
-  try {
-    const result = await db("boxes")
-      .where({ box_id, user_id: userId })
-      .update({ location });
-    if (result === 0) {
-      return res
-        .status(404)
-        .json({ error: "Unable to find box for this user" });
-    }
-    res.json({ message: "Box moved successfully" });
-  } catch (error) {
-    console.error("Error moving box:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
 app.delete("/boxes/:box_id", requireAuth, async (req, res) => {
-  const { userId } = req.auth;
+  const user_id = req.auth.userId;
   const { box_id } = req.params;
   try {
-    const user = await db("users")
-      .select("user_id")
-      .where({ clerk_id: userId })
-      .first();
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-    const { user_id } = user;
     const result = await db("boxes").where({ box_id, user_id }).del();
     if (result === 0) {
       return res
@@ -218,6 +154,7 @@ app.delete("/boxes/:box_id", requireAuth, async (req, res) => {
     res.json({ message: "Box deleted" });
   } catch (error) {
     console.error("Error deleting box:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -246,18 +183,23 @@ app.get("/boxes/:box_id/items/:item_id", async (req, res) => {
   }
 });
 
-app.post("/boxes/:box_id/items", async (req, res) => {
+app.post("/boxes/:box_id/items", requireAuth, async (req, res) => {
+  const user_id = req.auth.userId;
   const { box_id } = req.params;
   const { item_name } = req.body;
+
   try {
+    const box = await db("boxes").where({ box_id, user_id }).first();
+    if (!box) {
+      return res.status(404).json({ error: "Box not found" });
+    }
     const result = await db("items")
       .insert({
-        box_id: box_id,
+        box_id,
         item_name,
       })
       .returning("*");
-    const patchedResult = result[0];
-    res.json(patchedResult);
+    res.json(result[0]);
   } catch (error) {
     console.error("Error adding item to box:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -268,7 +210,6 @@ app.patch("/boxes/:box_id/items/:item_id", async (req, res) => {
   try {
     const { item_id } = req.params;
     const { is_checked } = req.body;
-
     const updated = await db("items")
       .where({ item_id })
       .update({ is_checked })

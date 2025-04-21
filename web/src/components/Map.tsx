@@ -7,15 +7,17 @@ import {
   Marker,
   useMapEvents,
 } from "react-leaflet";
-import axios from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import { useEffect, useState } from "react";
-import { useUser } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
+import { useNavigate } from "react-router";
+import { useAuthHeader } from "@/hooks";
 
 const API_HOST = import.meta.env.VITE_API_HOST;
 
 interface Box {
   box_id: number;
-  user_id: number;
+  user_id: string;
   latitude: number;
   longitude: number;
 }
@@ -33,39 +35,24 @@ export function Map() {
   const [boxes, setBoxes] = useState<Box[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [newItemName, setNewItemName] = useState("");
-  const [zuschUserId, setZuschUserId] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-
-  useEffect(() => {
-    const fetchUserId = async () => {
-      if (!user?.id) return;
-      try {
-        const response = await axios.get(`${API_HOST}/users/${user.id}`, {
-          params: { clerk_id: user?.id },
-        });
-        if (response.data && response.data.user_id) {
-          setZuschUserId(response.data.user_id);
-        } else {
-          console.warn("User not found or invalid clerk_id");
-        }
-      } catch (error) {
-        console.error("There was a problem fetching the user ID:", error);
-      }
-    };
-    if (user) {
-      fetchUserId();
-    }
-  }, [user]);
+  const { getToken } = useAuth();
+  const navigate = useNavigate();
+  const { getAuthHeader } = useAuthHeader();
 
   useEffect(() => {
     const fetchUserLocation = async () => {
-      if (!user?.id) return;
       try {
-        const response = await axios.get(`${API_HOST}/users/${user.id}`, {
-          params: { clerk_id: user?.id },
+        const token = await getToken();
+        const response = await axios.get(`${API_HOST}/user`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         });
-        const userData = response.data;
 
+        console.log("User Data: ", response.data);
+        const userData = response.data;
         const address = `${userData.street} ${userData.house_number}, ${userData.postal_code} ${userData.city}, ${userData.country}`;
         const geoCodeRes = await axios.get(
           "https://nominatim.openstreetmap.org/search",
@@ -89,6 +76,13 @@ export function Map() {
           );
         }
       } catch (error) {
+        const err = error as AxiosError;
+        const response = err.response as AxiosResponse;
+        if (response.status === 404) {
+          console.log("redirecting to register page");
+          navigate("/register");
+        }
+        console.log(response);
         console.error("There was a problem fetching the user location:", error);
       }
     };
@@ -102,7 +96,7 @@ export function Map() {
         const response = await axios.get(`${API_HOST}/boxes`);
         setBoxes(response.data);
       } catch (error) {
-        console.error("There was a problem fetching the boxes");
+        console.error("There was a problem fetching the boxes: ", error);
       }
     }
     fetchBoxes();
@@ -128,7 +122,20 @@ export function Map() {
     }
   }, [boxes]);
 
-  function AddUserBoxesOnClick() {
+  async function addBox(latlng: L.LatLng) {
+    const { lat, lng } = latlng;
+    const newBox = {
+      location: `SRID=4326;POINT(${lng} ${lat})`,
+    };
+    const headers = await getAuthHeader();
+    await axios.post(`${API_HOST}/boxes`, newBox, {
+      headers,
+    });
+    const response = await axios.get(`${API_HOST}/boxes`);
+    setBoxes(response.data);
+  }
+
+  function AddBoxOnClick() {
     useMapEvents({
       click(e) {
         if (!user) {
@@ -137,22 +144,9 @@ export function Map() {
           return;
         }
 
-        const { lat, lng } = e.latlng;
-
-        const newBox = {
-          location: `SRID=4326;POINT(${lng} ${lat})`,
-        };
-
-        axios
-          .post(`${API_HOST}/boxes`, newBox, {
-            headers: {
-              Authorization: user.id,
-            },
-          })
+        addBox(e.latlng)
           .then(() => {
-            axios.get(`${API_HOST}/boxes`).then((response) => {
-              setBoxes(response.data);
-            });
+            console.debug("then");
           })
           .catch((error) => {
             console.error("There was a problem adding the new box:", error);
@@ -179,14 +173,11 @@ export function Map() {
         box_id,
         item_name: newItemName,
       };
+      const headers = await getAuthHeader();
       const response = await axios.post(
         `${API_HOST}/boxes/${box_id}/items`,
         newItem,
-        {
-          headers: {
-            Authorization: user.id,
-          },
-        }
+        { headers }
       );
 
       const itemToBeAdded: Item = response.data;
@@ -233,10 +224,9 @@ export function Map() {
       return;
     }
     try {
+      const headers = await getAuthHeader();
       await axios.delete(`${API_HOST}/boxes/${box.box_id}`, {
-        headers: {
-          Authorization: user.id,
-        },
+        headers,
       });
       setBoxes((prevBoxes) => prevBoxes.filter((b) => b.box_id !== box.box_id));
       setItems((prevItems) =>
@@ -249,7 +239,7 @@ export function Map() {
 
   const getIconColor = (box: Box) => {
     const itemsByBox = items.filter((item) => item.box_id === box.box_id);
-    const isOwner = box.user_id === zuschUserId;
+    const isOwner = box.user_id === user?.id;
     const isEmptyOrAllChecked =
       itemsByBox.length === 0 || itemsByBox.every((item) => item.is_checked);
 
@@ -286,7 +276,15 @@ export function Map() {
   });
 
   if (!mapCenter) {
-    return <div>Loading...</div>;
+    return (
+      <div>
+        Loading Map... <br />
+        By the time you finish reading this, you should see the map. If you are
+        still reading this message, it means we are having trouble getting your
+        location. If you can still read this, please click on the blue house
+        icon in the top right corner to go to reset your address.
+      </div>
+    );
   }
 
   return (
@@ -302,7 +300,7 @@ export function Map() {
         />
         {filteredBoxes.map((box) => {
           const itemsByBox = items.filter((item) => item.box_id === box.box_id);
-          const isOwner = box.user_id === zuschUserId;
+          const isOwner = box.user_id === user?.id;
           return (
             <Marker
               key={box.box_id}
@@ -333,6 +331,7 @@ export function Map() {
                             textDecoration: item.is_checked
                               ? "line-through"
                               : "none",
+                            color: item.is_checked ? "grey" : "inherit",
                           }}
                         >
                           {item.item_name}
@@ -371,7 +370,7 @@ export function Map() {
             </Marker>
           );
         })}
-        <AddUserBoxesOnClick />
+        <AddBoxOnClick />
       </MapContainer>
       <div className="search">
         <h3>

@@ -1,13 +1,19 @@
 import "./RegisterPage.css";
 import { useState } from "react";
 import axios from "axios";
-import { useUser } from "@clerk/clerk-react";
+import { useUser, useAuth } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
+import countries from "world-countries";
+
+const countryList = countries.map((country) => ({
+  name: country.name.common,
+}));
 
 const API_HOST = import.meta.env.VITE_API_HOST;
 
 export function RegisterPage() {
   const { user } = useUser();
+  const { getToken } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -18,7 +24,9 @@ export function RegisterPage() {
     country: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
@@ -29,13 +37,17 @@ export function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const newUserInfo = {
-      clerk_id: user?.id,
-      user_name: user?.username,
-      email: user?.emailAddresses[0].emailAddress,
+      user_id: user?.id,
       ...formData,
     };
     try {
-      const response = await axios.post(`${API_HOST}/register`, newUserInfo);
+      const token = await getToken();
+      const response = await axios.post(`${API_HOST}/register`, newUserInfo, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
       console.log("Form submitted successfully:", response.data);
       navigate("/");
     } catch (error) {
@@ -48,7 +60,10 @@ export function RegisterPage() {
     <>
       <h1>You're almost ready!</h1>
       <div className="address-form">
-        <h3>Please provide your address below to start using Zusch!</h3>
+        <h3>
+          A valid address is required for Zusch! to work properly. <br />
+          Please provide your address below to start using Zusch!
+        </h3>
         <form onSubmit={handleSubmit}>
           <div>
             <label htmlFor="street">Street</label>
@@ -92,13 +107,19 @@ export function RegisterPage() {
           </div>
           <div>
             <label htmlFor="country">Country</label>
-            <input
-              type="text"
+            <select
               name="country"
               id="country"
               value={formData.country}
               onChange={handleChange}
-            />
+            >
+              <option value="">Select your country</option>
+              {countryList.map((country) => (
+                <option key={country.name} value={country.name}>
+                  {country.name}
+                </option>
+              ))}
+            </select>
           </div>
           <button type="submit">Submit</button>
         </form>

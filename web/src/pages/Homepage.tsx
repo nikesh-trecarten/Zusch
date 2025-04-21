@@ -42,15 +42,15 @@ export function HomePage() {
       <SignedIn>
         <h3 className="welcome-text">
           Welcome {user?.username}! <br />
-          There are X boxes near you, full of items looking for a new home!
-          {/* Replace X with number of boxes visible on map or within defaul search parameters */}
-          <br />
           Click on a box to see what's in it, or click on the map where you want
           others to find your box! <br /> If you take something from a box, or
           notice something is already gone, please check it off the list! <br />
         </h3>
         <MapLegend />
         <Map />
+        <h3>Tips!</h3>
+        <h3>Try searching for items in different languages.</h3>
+        <h3>Don't see any boxes? Try zooming out!</h3>
       </SignedIn>
     </>
   );
