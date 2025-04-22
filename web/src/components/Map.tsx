@@ -301,11 +301,25 @@ export function Map() {
         {filteredBoxes.map((box) => {
           const itemsByBox = items.filter((item) => item.box_id === box.box_id);
           const isOwner = box.user_id === user?.id;
+          const icon = getIconColor(box);
+          let zIndexOffset = 0;
+
+          if (icon.options.iconUrl.includes("green")) {
+            zIndexOffset = 1000;
+          } else if (icon.options.iconUrl.includes("gold")) {
+            zIndexOffset = 750;
+          } else if (icon.options.iconUrl.includes("blue")) {
+            zIndexOffset = 500;
+          } else if (icon.options.iconUrl.includes("grey")) {
+            zIndexOffset = 250;
+          }
+
           return (
             <Marker
               key={box.box_id}
               position={[box.latitude, box.longitude]}
-              icon={getIconColor(box)}
+              icon={icon}
+              zIndexOffset={zIndexOffset}
             >
               <Popup key={box.box_id}>
                 <ul>
