@@ -20,3 +20,5 @@ Seekers can cross out items from the boxes if they take an item, or if they noti
 https://github.com/pointhi/leaflet-color-markers
 
 <a href="https://www.flaticon.com/free-icons/home-button" title="home button icons">Home button icons created by hqrloveq - Flaticon</a>
+
+<a href="https://www.flaticon.com/free-icons/off" title="off icons">Off icons created by hqrloveq - Flaticon</a>

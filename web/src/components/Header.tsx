@@ -37,7 +37,11 @@ export function Header() {
               />
             </Link>
             <SignOutButton>
-              <h2>Sign Out</h2>
+              <img
+                className="signout-button"
+                src="signout-button.png"
+                alt="signout button"
+              />
             </SignOutButton>
           </div>
         </SignedIn>

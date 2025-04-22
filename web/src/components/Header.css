@@ -2,13 +2,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 0 20px 0 20px;
+  padding: 0 20px 0 20px;
+  border-color: #32cd30;
+  background-color: #32cd30;
 }
 
 .corner-buttons {
   display: flex;
   gap: 20px;
-  align-items: center;
+  align-items: baseline;
 }
 
 a {
@@ -20,6 +22,13 @@ h2:hover {
 }
 
 .user-settings-link {
+  width: 28px;
+  height: 28px;
+  background-color: white;
+  border-radius: 50%;
+}
+
+.signout-button {
   width: 28px;
   height: 28px;
 }

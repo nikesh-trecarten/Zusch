@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import countries from "world-countries";
 import { Header } from "../components/Header";
 import "./UserSettingsPage.css";
+import { useNavigate } from "react-router";
 
 const API_HOST = import.meta.env.VITE_API_HOST;
 
@@ -20,6 +21,7 @@ export function UserSettingsPage() {
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("");
   const { getAuthHeader } = useAuthHeader();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -68,6 +70,7 @@ export function UserSettingsPage() {
         },
         { headers }
       );
+      navigate("/");
     } catch (error) {
       console.error("There was a problem updating the address:", error);
       alert("There was an error updating the address. Please try again.");
@@ -83,59 +86,50 @@ export function UserSettingsPage() {
         Please note that a valid address is required for Zusch! to run properly.
       </p>
       <form className="user-settings-form">
-        <div>
-          <label htmlFor="street">Street: </label>
-          <input
-            type="text"
-            placeholder="New Street"
-            value={street}
-            onChange={(e) => setStreet(e.target.value)}
-          />
-        </div>
-        <div>
-          <label htmlFor="house_number">House Number: </label>
-          <input
-            type="text"
-            placeholder="New House Number"
-            value={houseNumber}
-            onChange={(e) => setHouseNumber(e.target.value)}
-          />
-        </div>
-        <div>
-          <label htmlFor="postal_code">Postal Code: </label>
-          <input
-            type="text"
-            placeholder="New Postal Code"
-            value={postalCode}
-            onChange={(e) => setPostalCode(e.target.value)}
-          />
-        </div>
-        <div>
-          <label htmlFor="city">City: </label>
-          <input
-            type="text"
-            placeholder="New City"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-          />
-        </div>
-        <div>
-          <label htmlFor="country">Country: </label>
-          <select
-            name="country"
-            id="country"
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-          >
-            <option value="">Select your country</option>
-            {countryList.map((country) => (
-              <option key={country.name} value={country.name}>
-                {country.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <label htmlFor="street">Street: </label>
+        <input
+          type="text"
+          placeholder="New Street"
+          value={street}
+          onChange={(e) => setStreet(e.target.value)}
+        />
+        <label htmlFor="house_number">House Number: </label>
+        <input
+          type="text"
+          placeholder="New House Number"
+          value={houseNumber}
+          onChange={(e) => setHouseNumber(e.target.value)}
+        />
+        <label htmlFor="postal_code">Postal Code: </label>
+        <input
+          type="text"
+          placeholder="New Postal Code"
+          value={postalCode}
+          onChange={(e) => setPostalCode(e.target.value)}
+        />
+        <label htmlFor="city">City: </label>
+        <input
+          type="text"
+          placeholder="New City"
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+        />
+        <label htmlFor="country">Country: </label>
+        <select
+          name="country"
+          id="country"
+          value={country}
+          onChange={(e) => setCountry(e.target.value)}
+        >
+          <option value="">Select your country</option>
+          {countryList.map((country) => (
+            <option key={country.name} value={country.name}>
+              {country.name}
+            </option>
+          ))}
+        </select>
         <button
+          className="update-address-button"
           type="button"
           onClick={handleUpdateAddress}
           disabled={!street || !houseNumber || !postalCode || !city || !country}

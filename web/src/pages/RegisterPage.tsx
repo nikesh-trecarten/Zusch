@@ -59,71 +59,71 @@ export function RegisterPage() {
   return (
     <>
       <h1>You're almost ready!</h1>
-      <div className="address-form">
-        <h3>
-          A valid address is required for Zusch! to work properly. <br />
-          Please provide your address below to start using Zusch!
-        </h3>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="street">Street</label>
-            <input
-              type="text"
-              name="street"
-              id="street"
-              value={formData.street}
-              onChange={handleChange}
-            />
-          </div>
-          <div>
-            <label htmlFor="house_number">House Number</label>
-            <input
-              type="text"
-              name="house_number"
-              id="house_number"
-              value={formData.house_number}
-              onChange={handleChange}
-            />
-          </div>
-          <div>
-            <label htmlFor="postal_code">Postal Code</label>
-            <input
-              type="text"
-              name="postal_code"
-              id="postal_code"
-              value={formData.postal_code}
-              onChange={handleChange}
-            />
-          </div>
-          <div>
-            <label htmlFor="city">City</label>
-            <input
-              type="text"
-              name="city"
-              id="city"
-              value={formData.city}
-              onChange={handleChange}
-            />
-          </div>
-          <div>
-            <label htmlFor="country">Country</label>
-            <select
-              name="country"
-              id="country"
-              value={formData.country}
-              onChange={handleChange}
-            >
-              <option value="">Select your country</option>
-              {countryList.map((country) => (
-                <option key={country.name} value={country.name}>
-                  {country.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button type="submit">Submit</button>
-        </form>
-      </div>
+      <h3>
+        A valid address is required for Zusch! to work properly. <br />
+        Please provide your address below to start using Zusch!
+      </h3>
+      <form className="address-form" onSubmit={handleSubmit}>
+        <label htmlFor="street">Street</label>
+        <input
+          type="text"
+          name="street"
+          id="street"
+          value={formData.street}
+          onChange={handleChange}
+        />
+        <label htmlFor="house_number">House Number</label>
+        <input
+          type="text"
+          name="house_number"
+          id="house_number"
+          value={formData.house_number}
+          onChange={handleChange}
+        />
+        <label htmlFor="postal_code">Postal Code</label>
+        <input
+          type="text"
+          name="postal_code"
+          id="postal_code"
+          value={formData.postal_code}
+          onChange={handleChange}
+        />
+        <label htmlFor="city">City</label>
+        <input
+          type="text"
+          name="city"
+          id="city"
+          value={formData.city}
+          onChange={handleChange}
+        />
+        <label htmlFor="country">Country</label>
+        <select
+          name="country"
+          id="country"
+          value={formData.country}
+          onChange={handleChange}
+        >
+          <option value="">Select your country</option>
+          {countryList.map((country) => (
+            <option key={country.name} value={country.name}>
+              {country.name}
+            </option>
+          ))}
+        </select>
+        <button
+          className="signup-button"
+          type="submit"
+          disabled={
+            !formData.street ||
+            !formData.house_number ||
+            !formData.postal_code ||
+            !formData.city ||
+            !formData.country
+          }
+        >
+          Sign up!
+        </button>
+      </form>
     </>
   );
 }

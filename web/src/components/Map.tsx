@@ -312,12 +312,12 @@ export function Map() {
                   {itemsByBox.every((item) => item.is_checked) &&
                   itemsByBox.length > 0 ? (
                     isOwner ? (
-                      <li>
+                      <li className="list-message">
                         It looks like all your items have found a new home!
                         Please remove this box when you can, or add new items!
                       </li>
                     ) : (
-                      <li>
+                      <li className="list-message">
                         It looks like all these items have already found a new
                         home!
                       </li>
@@ -325,7 +325,13 @@ export function Map() {
                   ) : null}
                   {itemsByBox.length > 0 ? (
                     itemsByBox.map((item) => (
-                      <li key={item.item_id}>
+                      <li className="item" key={item.item_id}>
+                        <input
+                          className="checkbox"
+                          type="checkbox"
+                          checked={item.is_checked}
+                          onChange={() => handleCheckItem(box, item)}
+                        />
                         <label
                           style={{
                             textDecoration: item.is_checked
@@ -336,22 +342,20 @@ export function Map() {
                         >
                           {item.item_name}
                         </label>
-                        <input
-                          type="checkbox"
-                          checked={item.is_checked}
-                          onChange={() => handleCheckItem(box, item)}
-                        />
                       </li>
                     ))
                   ) : (
-                    <li>
+                    <li className="list-message">
                       This box is empty, add items for other users to find!
                     </li>
                   )}
                 </ul>
                 {isOwner && (
                   <>
-                    <form onSubmit={(e) => handleAddItem(e, box.box_id)}>
+                    <form
+                      className="add-item-form"
+                      onSubmit={(e) => handleAddItem(e, box.box_id)}
+                    >
                       <input
                         type="text"
                         value={newItemName}
@@ -361,7 +365,10 @@ export function Map() {
                       />
                       <button type="submit">Add Item</button>
                     </form>
-                    <button onClick={() => handleDeleteBox(box)}>
+                    <button
+                      className="delete-box-button"
+                      onClick={() => handleDeleteBox(box)}
+                    >
                       Delete Box
                     </button>
                   </>
