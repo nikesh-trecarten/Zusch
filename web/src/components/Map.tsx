@@ -51,7 +51,6 @@ export function Map() {
           },
         });
 
-        console.log("User Data: ", response.data);
         const userData = response.data;
         const address = `${userData.street} ${userData.house_number}, ${userData.postal_code} ${userData.city}, ${userData.country}`;
         const geoCodeRes = await axios.get(
@@ -301,23 +300,37 @@ export function Map() {
         {filteredBoxes.map((box) => {
           const itemsByBox = items.filter((item) => item.box_id === box.box_id);
           const isOwner = box.user_id === user?.id;
+          const icon = getIconColor(box);
+          let zIndexOffset = 0;
+
+          if (icon.options.iconUrl.includes("green")) {
+            zIndexOffset = 1000;
+          } else if (icon.options.iconUrl.includes("gold")) {
+            zIndexOffset = 750;
+          } else if (icon.options.iconUrl.includes("blue")) {
+            zIndexOffset = 500;
+          } else if (icon.options.iconUrl.includes("grey")) {
+            zIndexOffset = 250;
+          }
+
           return (
             <Marker
               key={box.box_id}
               position={[box.latitude, box.longitude]}
-              icon={getIconColor(box)}
+              icon={icon}
+              zIndexOffset={zIndexOffset}
             >
               <Popup key={box.box_id}>
                 <ul>
                   {itemsByBox.every((item) => item.is_checked) &&
                   itemsByBox.length > 0 ? (
                     isOwner ? (
-                      <li>
+                      <li className="list-message">
                         It looks like all your items have found a new home!
                         Please remove this box when you can, or add new items!
                       </li>
                     ) : (
-                      <li>
+                      <li className="list-message">
                         It looks like all these items have already found a new
                         home!
                       </li>
@@ -325,7 +338,13 @@ export function Map() {
                   ) : null}
                   {itemsByBox.length > 0 ? (
                     itemsByBox.map((item) => (
-                      <li key={item.item_id}>
+                      <li className="item" key={item.item_id}>
+                        <input
+                          className="checkbox"
+                          type="checkbox"
+                          checked={item.is_checked}
+                          onChange={() => handleCheckItem(box, item)}
+                        />
                         <label
                           style={{
                             textDecoration: item.is_checked
@@ -336,22 +355,20 @@ export function Map() {
                         >
                           {item.item_name}
                         </label>
-                        <input
-                          type="checkbox"
-                          checked={item.is_checked}
-                          onChange={() => handleCheckItem(box, item)}
-                        />
                       </li>
                     ))
                   ) : (
-                    <li>
+                    <li className="list-message">
                       This box is empty, add items for other users to find!
                     </li>
                   )}
                 </ul>
                 {isOwner && (
                   <>
-                    <form onSubmit={(e) => handleAddItem(e, box.box_id)}>
+                    <form
+                      className="add-item-form"
+                      onSubmit={(e) => handleAddItem(e, box.box_id)}
+                    >
                       <input
                         type="text"
                         value={newItemName}
@@ -361,7 +378,10 @@ export function Map() {
                       />
                       <button type="submit">Add Item</button>
                     </form>
-                    <button onClick={() => handleDeleteBox(box)}>
+                    <button
+                      className="delete-box-button"
+                      onClick={() => handleDeleteBox(box)}
+                    >
                       Delete Box
                     </button>
                   </>

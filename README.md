@@ -6,17 +6,21 @@ Zusch is an app that makes it easy to give away items you no longer need, or fin
 
 No lengthy back-and-forth, no hassle, no fuss, _einfach zuschen_!
 
-## Givers
+## Giving
 
-Givers post a box on a map and create a list of its contents. They can remove items from the list that they notice have been taken. They receive updates when items are taken and finally, when the box is empty.
+Users can post a box on a map and create a list of its contents. They can remove items from the list that they notice have been taken. They can see when all items have been taken from their box.
 
-## Seekers
+## Seeking
 
-Seekers can find boxes and their items on the map, and come by to take a look!
-Seekers can cross out items from the boxes if they take an item, or if they notice someone else already took an item.
+Seekers can also find other users' boxes and their items on the map, and come by to take a look!
+Users can cross out items from the box's item list if they take an item, or if they notice someone else already took an item.
 
 ### Attributions:
 
 https://github.com/pointhi/leaflet-color-markers
 
 <a href="https://www.flaticon.com/free-icons/home-button" title="home button icons">Home button icons created by hqrloveq - Flaticon</a>
+
+<a href="https://www.flaticon.com/free-icons/off" title="off icons">Off icons created by hqrloveq - Flaticon</a>
+
+Photo by <a href="https://unsplash.com/@purzlbaum?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Claudio Schwarz</a> on <a href="https://unsplash.com/photos/white-and-brown-labeled-carton-TSgpeJ3yu8g?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>

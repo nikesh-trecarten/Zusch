@@ -13,9 +13,10 @@ export function Header() {
   return (
     <>
       <div className="header">
-        <h1>
-          <Link to="/">Z!</Link>
-        </h1>
+        <Link className="logo" to="/">
+          <img className="logo-image" src="FullLogo_NoBuffer.png" alt="logo" />
+          <h1 className="logo-text">ZUSCH!</h1>
+        </Link>
         <SignedOut>
           <div className="corner-buttons">
             <SignInButton mode="modal">
@@ -31,13 +32,17 @@ export function Header() {
             <UserButton />
             <Link to="/settings">
               <img
-                className="user-settings-link"
+                className="corner-button"
                 src="home-button.png"
                 alt="user settings link"
               />
             </Link>
             <SignOutButton>
-              <h2>Sign Out</h2>
+              <img
+                className="corner-button"
+                src="signout-button.png"
+                alt="signout button"
+              />
             </SignOutButton>
           </div>
         </SignedIn>

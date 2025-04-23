@@ -13,10 +13,11 @@ export function HomePage() {
       <SignedOut>
         <h1>Welcome to Zusch!</h1>
         <h3>
-          Zusch (from the German "zu verschenken") <br />
+          Zusch! (from the German "zu verschenken") <br />
           is an app that makes giving unwanted items away, or finding new
           treasures for your home, easier than ever!
         </h3>
+        <img className="gratis" src="gratis.jpg" alt="gratis" />
         <h3>
           Want to give your old or unused items a chance to make someone else
           happy? <br />
