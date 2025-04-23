@@ -51,7 +51,6 @@ export function Map() {
           },
         });
 
-        console.log("User Data: ", response.data);
         const userData = response.data;
         const address = `${userData.street} ${userData.house_number}, ${userData.postal_code} ${userData.city}, ${userData.country}`;
         const geoCodeRes = await axios.get(

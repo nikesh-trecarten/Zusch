@@ -3,8 +3,45 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 20px 0 20px;
-  border-color: #32cd30;
   background-color: #32cd30;
+  margin: -8px -8px 0 -8px;
+}
+
+.logo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-image {
+  height: 50px;
+  border-radius: 50%;
+}
+
+.logo-text {
+  color: white;
+}
+
+a {
+  text-decoration: none;
+}
+
+a:visited {
+  color: inherit;
+}
+
+h2 {
+  color: white;
+  height: 85.88px;
+  padding: 0 10px;
+  margin: 0;
+  align-content: center;
+}
+
+h2:hover {
+  cursor: pointer;
+  background-color: #2c5e1a;
 }
 
 .corner-buttons {
@@ -13,26 +50,13 @@
   align-items: baseline;
 }
 
-a {
-  text-decoration: none;
-}
-
-h2:hover {
-  cursor: pointer;
-}
-
-.user-settings-link {
+.corner-button {
   width: 28px;
   height: 28px;
   background-color: white;
   border-radius: 50%;
 }
 
-.signout-button {
-  width: 28px;
-  height: 28px;
-}
-
-.signout-button:hover {
+.corner-button:hover {
   cursor: pointer;
 }

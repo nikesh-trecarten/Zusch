@@ -80,10 +80,11 @@ export function UserSettingsPage() {
   return (
     <>
       <Header />
-      <h1>Settings</h1>
-      <h2>User Address</h2>
+      <h1>Address</h1>
       <p>
         Please note that a valid address is required for Zusch! to run properly.
+        <br />
+        Please fill the form completely to proceed.
       </p>
       <form className="user-settings-form">
         <label htmlFor="street">Street: </label>
