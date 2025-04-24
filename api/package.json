@@ -14,7 +14,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node --watch src/app.js",
     "db-reset:prod": "PGPASSWORD=RM13Y21YWhkmL32zTVjJWUcV90x6LQVk psql -h dpg-cvmf9pjuibrs73bg567g-a.frankfurt-postgres.render.com -U nikeshtrecarten zusch -f ./src/data/db-reset.sql",
-    "db-reset:dev": "psql -d zusch -f ./src/data/db-reset.sql"
+    "db-reset:dev": "psql -d zusch -f ./data/db-reset.sql"
   },
   "author": "",
   "license": "ISC",
