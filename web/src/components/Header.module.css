@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px 0 20px;
+  padding: 0 20px;
   background-color: #32cd30;
   margin: -8px -8px 0 -8px;
 }
@@ -12,26 +12,19 @@
   flex-direction: row;
   align-items: center;
   gap: 10px;
+  text-decoration: none;
 }
 
-.logo-image {
+.logoImage {
   height: 50px;
   border-radius: 50%;
 }
 
-.logo-text {
+.logoText {
   color: white;
 }
 
-a {
-  text-decoration: none;
-}
-
-a:visited {
-  color: inherit;
-}
-
-h2 {
+.clerkButton {
   color: white;
   height: 85.88px;
   padding: 0 10px;
@@ -39,24 +32,21 @@ h2 {
   align-content: center;
 }
 
-h2:hover {
+.clerkButton:hover {
   cursor: pointer;
   background-color: #2c5e1a;
 }
 
-.corner-buttons {
+.cornerButtons {
   display: flex;
   gap: 20px;
   align-items: baseline;
 }
 
-.corner-button {
+.cornerButton {
   width: 28px;
   height: 28px;
   background-color: white;
   border-radius: 50%;
-}
-
-.corner-button:hover {
   cursor: pointer;
 }

@@ -1,11 +1,11 @@
-.map-legend {
+.mapLegend {
   display: flex;
   flex-direction: row;
   justify-content: space-around;
   margin: 5px;
 }
 
-.map-legend-item {
+.mapLegendItem {
   display: flex;
   flex-direction: row;
   gap: 5px;

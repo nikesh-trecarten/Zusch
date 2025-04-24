@@ -1,4 +1,4 @@
-import "./RegisterPage.css";
+import styles from "./RegisterPage.module.css";
 import { useState } from "react";
 import axios from "axios";
 import { useUser, useAuth } from "@clerk/clerk-react";
@@ -63,7 +63,7 @@ export function RegisterPage() {
         A valid address is required for Zusch! to work properly. <br />
         Please provide your address below to start using Zusch!
       </h3>
-      <form className="address-form" onSubmit={handleSubmit}>
+      <form className={styles.addressForm} onSubmit={handleSubmit}>
         <label htmlFor="street">Street</label>
         <input
           type="text"
@@ -111,7 +111,7 @@ export function RegisterPage() {
           ))}
         </select>
         <button
-          className="signup-button"
+          className={styles.signupButton}
           type="submit"
           disabled={
             !formData.street ||

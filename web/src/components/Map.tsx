@@ -1,4 +1,4 @@
-import "./Map.css";
+import styles from "./Map.module.css";
 import L from "leaflet";
 import {
   MapContainer,
@@ -325,12 +325,12 @@ export function Map() {
                   {itemsByBox.every((item) => item.is_checked) &&
                   itemsByBox.length > 0 ? (
                     isOwner ? (
-                      <li className="list-message">
+                      <li className={styles.listMessage}>
                         It looks like all your items have found a new home!
                         Please remove this box when you can, or add new items!
                       </li>
                     ) : (
-                      <li className="list-message">
+                      <li className={styles.listMessage}>
                         It looks like all these items have already found a new
                         home!
                       </li>
@@ -338,9 +338,9 @@ export function Map() {
                   ) : null}
                   {itemsByBox.length > 0 ? (
                     itemsByBox.map((item) => (
-                      <li className="item" key={item.item_id}>
+                      <li className={styles.listItem} key={item.item_id}>
                         <input
-                          className="checkbox"
+                          className={styles.checkbox}
                           type="checkbox"
                           checked={item.is_checked}
                           onChange={() => handleCheckItem(box, item)}
@@ -358,7 +358,7 @@ export function Map() {
                       </li>
                     ))
                   ) : (
-                    <li className="list-message">
+                    <li className={styles.listMessage}>
                       This box is empty, add items for other users to find!
                     </li>
                   )}
@@ -366,7 +366,7 @@ export function Map() {
                 {isOwner && (
                   <>
                     <form
-                      className="add-item-form"
+                      className={styles.addItemForm}
                       onSubmit={(e) => handleAddItem(e, box.box_id)}
                     >
                       <input
@@ -379,7 +379,7 @@ export function Map() {
                       <button type="submit">Add Item</button>
                     </form>
                     <button
-                      className="delete-box-button"
+                      className={styles.deleteBoxButton}
                       onClick={() => handleDeleteBox(box)}
                     >
                       Delete Box
@@ -392,7 +392,7 @@ export function Map() {
         })}
         <AddBoxOnClick />
       </MapContainer>
-      <div className="search">
+      <div className={styles.search}>
         <h3>
           Looking for something specific? <br /> Type what you're looking for
           below, to only see boxes containing that item!

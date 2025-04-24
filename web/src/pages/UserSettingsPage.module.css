@@ -1,8 +1,4 @@
-h1 {
-  text-align: center;
-}
-
-.address-form {
+.userSettingsForm {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
@@ -10,10 +6,15 @@ h1 {
   justify-self: center;
   text-align: right;
   margin-top: 20px;
-  max-width: 430px;
+  max-width: 450px;
 }
 
-.signup-button {
+.userSettingsForm select {
+  width: 200px;
+  justify-items: center;
+}
+
+.updateAddressButton {
   padding: 20px;
   margin: 20px;
   grid-column: 1 / -1;
