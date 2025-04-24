@@ -1,4 +1,4 @@
-import "./Header.css";
+import styles from "./Header.module.css";
 import { Link } from "react-router-dom";
 import {
   SignedIn,
@@ -12,34 +12,38 @@ import {
 export function Header() {
   return (
     <>
-      <div className="header">
-        <Link className="logo" to="/">
-          <img className="logo-image" src="FullLogo_NoBuffer.png" alt="logo" />
-          <h1 className="logo-text">ZUSCH!</h1>
+      <div className={styles.header}>
+        <Link className={styles.logo} to="/">
+          <img
+            className={styles.logoImage}
+            src="FullLogo_NoBuffer.png"
+            alt="logo"
+          />
+          <h1 className={styles.logoText}>ZUSCH!</h1>
         </Link>
         <SignedOut>
-          <div className="corner-buttons">
+          <div className={styles.cornerButtons}>
             <SignInButton mode="modal">
-              <h2>Sign In</h2>
+              <h2 className={styles.clerkButton}>Sign In</h2>
             </SignInButton>
             <SignUpButton forceRedirectUrl={"/register"} mode="modal">
-              <h2>Sign Up</h2>
+              <h2 className={styles.clerkButton}>Sign Up</h2>
             </SignUpButton>
           </div>
         </SignedOut>
         <SignedIn>
-          <div className="corner-buttons">
+          <div className={styles.cornerButtons}>
             <UserButton />
             <Link to="/settings">
               <img
-                className="corner-button"
+                className={styles.cornerButton}
                 src="home-button.png"
                 alt="user settings link"
               />
             </Link>
             <SignOutButton>
               <img
-                className="corner-button"
+                className={styles.cornerButton}
                 src="signout-button.png"
                 alt="signout button"
               />

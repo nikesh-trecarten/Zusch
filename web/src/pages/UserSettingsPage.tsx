@@ -4,7 +4,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import countries from "world-countries";
 import { Header } from "../components/Header";
-import "./UserSettingsPage.css";
+import styles from "./UserSettingsPage.module.css";
 import { useNavigate } from "react-router";
 
 const API_HOST = import.meta.env.VITE_API_HOST;
@@ -84,9 +84,9 @@ export function UserSettingsPage() {
       <p>
         Please note that a valid address is required for Zusch! to run properly.
         <br />
-        Please fill the form completely to proceed.
+        Please fill in the form completely to proceed.
       </p>
-      <form className="user-settings-form">
+      <form className={styles.userSettingsForm}>
         <label htmlFor="street">Street: </label>
         <input
           type="text"
@@ -130,7 +130,7 @@ export function UserSettingsPage() {
           ))}
         </select>
         <button
-          className="update-address-button"
+          className={styles.updateAddressButton}
           type="button"
           onClick={handleUpdateAddress}
           disabled={!street || !houseNumber || !postalCode || !city || !country}

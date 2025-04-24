@@ -1,4 +1,4 @@
-import "./HomePage.css";
+import styles from "./HomePage.module.css";
 import { Map } from "../components/Map";
 import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
 import { Header } from "../components/Header";
@@ -17,7 +17,7 @@ export function HomePage() {
           is an app that makes giving unwanted items away, or finding new
           treasures for your home, easier than ever!
         </h3>
-        <img className="gratis" src="gratis.jpg" alt="gratis" />
+        <img className={styles.gratis} src="gratis.jpg" alt="gratis" />
         <h3>
           Want to give your old or unused items a chance to make someone else
           happy? <br />
@@ -41,7 +41,7 @@ export function HomePage() {
         <MapLegend />
       </SignedOut>
       <SignedIn>
-        <h3 className="welcome-text">
+        <h3 className={styles.welcomeText}>
           Welcome {user?.username}! <br />
           Click on a box to see what's in it, or click on the map where you want
           others to find your box! <br /> If you take something from a box, or
