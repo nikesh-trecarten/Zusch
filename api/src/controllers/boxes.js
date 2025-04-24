@@ -49,6 +49,61 @@ async function getBoxItemById(req, res) {
   }
 }
 
+async function addBox(req, res) {
+  const user_id = req.auth.userId;
+  const { location } = req.body;
+  try {
+    await db("boxes").insert({
+      user_id,
+      location,
+    });
+    res.json({ message: "Box placed in map" });
+  } catch (error) {
+    console.error("Error placing box in map:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+async function deleteBox(req, res) {
+  const user_id = req.auth.userId;
+  const { box_id } = req.params;
+  try {
+    const result = await db("boxes").where({ box_id, user_id }).del();
+    if (result === 0) {
+      return res
+        .status(404)
+        .json({ error: "Unable to find box for this user" });
+    }
+    res.json({ message: "Box deleted" });
+  } catch (error) {
+    console.error("Error deleting box:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+async function addItem(req, res) {
+  const user_id = req.auth.userId;
+  const { box_id } = req.params;
+  const { item_name } = req.body;
+
+  try {
+    const box = await db("boxes").where({ box_id, user_id }).first();
+    if (!box) {
+      return res.status(404).json({ error: "Box not found" });
+    }
+    const result = await db("items")
+      .insert({
+        box_id,
+        item_name,
+      })
+      .returning("*");
+    res.json(result[0]);
+  } catch (error) {
+    console.error("Error adding item to box:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 async function checkItem(req, res) {
   try {
     const { item_id } = req.params;
@@ -69,5 +124,8 @@ module.exports = {
   getBoxById,
   getBoxItems,
   getBoxItemById,
+  addBox,
+  deleteBox,
+  addItem,
   checkItem,
 };
