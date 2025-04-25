@@ -1,7 +1,38 @@
 .welcomeText {
-  margin: 20px;
+  margin: 10px;
+}
+
+.intro {
+  justify-self: center;
+  @media (max-width: 914px) {
+    max-width: 450px;
+  }
+  @media (max-width: 465px) {
+    max-width: 318px;
+  }
 }
 
 .gratis {
-  width: 500px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.description {
+  justify-self: center;
+  @media (max-width: 1063px) {
+    max-width: 664px;
+  }
+  @media (max-width: 670px) {
+    max-width: 394px;
+  }
+}
+
+.howToUse {
+  justify-self: center;
+  @media (max-width: 843px) {
+    max-width: 451px;
+  }
+  @media (max-width: 487px) {
+    max-width: 328px;
+  }
 }

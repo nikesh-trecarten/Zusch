@@ -292,6 +292,7 @@ export function Map() {
         center={mapCenter}
         zoom={16}
         style={{ height: "400px", width: "100%" }} // height must always be defined
+        zoomControl={false}
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -393,10 +394,6 @@ export function Map() {
         <AddBoxOnClick />
       </MapContainer>
       <div className={styles.search}>
-        <h3>
-          Looking for something specific? <br /> Type what you're looking for
-          below, to only see boxes containing that item!
-        </h3>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -406,12 +403,12 @@ export function Map() {
             type="text"
             name="items"
             id="items"
-            placeholder="Search for boxes with this item..."
+            placeholder="See only boxes with this item..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           <button type="button" onClick={() => setSearchTerm("")}>
-            Clear Search Field
+            Clear Filter
           </button>
         </form>
       </div>
