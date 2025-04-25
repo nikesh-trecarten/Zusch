@@ -5,19 +5,19 @@ export function MapLegend() {
     <div className={styles.mapLegend}>
       <div className={styles.mapLegendItem}>
         <img src="marker-icon-green.png" alt="green marker" />
-        <h3>Boxes</h3>
+        <h4>Boxes</h4>
       </div>
       <div className={styles.mapLegendItem}>
         <img src="marker-icon-grey.png" alt="grey marker" />
-        <h3>Empty Boxes</h3>
+        <h4 className={styles.emptyBoxes}>Empty Boxes</h4>
       </div>
       <div className={styles.mapLegendItem}>
         <img src="marker-icon-blue.png" alt="blue marker" />
-        <h3>Your Boxes</h3>
+        <h4 className={styles.yourBoxes}>Your Boxes</h4>
       </div>
       <div className={styles.mapLegendItem}>
         <img src="marker-icon-gold.png" alt="gold marker" />
-        <h3>Your Empty Boxes</h3>
+        <h4 className={styles.yourEmptyBoxes}>Your Empty Boxes</h4>
       </div>
     </div>
   );

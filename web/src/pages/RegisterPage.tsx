@@ -59,10 +59,10 @@ export function RegisterPage() {
   return (
     <>
       <h1>You're almost ready!</h1>
-      <h3>
+      <p>
         A valid address is required for Zusch! to work properly. <br />
         Please provide your address below to start using Zusch!
-      </h3>
+      </p>
       <form className={styles.addressForm} onSubmit={handleSubmit}>
         <label htmlFor="street">Street</label>
         <input

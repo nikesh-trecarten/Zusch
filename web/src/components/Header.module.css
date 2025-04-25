@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 10px;
   background-color: #32cd30;
   margin: -8px -8px 0 -8px;
 }
@@ -24,10 +24,18 @@
   color: white;
 }
 
+.cornerButtons {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  justify-content: right;
+}
+
 .clerkButton {
   color: white;
   height: 85.88px;
-  padding: 0 10px;
+  max-width: 50px;
+  padding: 0 5px;
   margin: 0;
   align-content: center;
 }
@@ -35,12 +43,6 @@
 .clerkButton:hover {
   cursor: pointer;
   background-color: #2c5e1a;
-}
-
-.cornerButtons {
-  display: flex;
-  gap: 20px;
-  align-items: baseline;
 }
 
 .cornerButton {

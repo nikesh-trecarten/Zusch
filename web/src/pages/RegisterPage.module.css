@@ -6,7 +6,12 @@
   justify-self: center;
   text-align: right;
   margin-top: 20px;
-  max-width: 430px;
+  max-width: 450px;
+}
+
+.addressForm select {
+  width: 200px;
+  justify-items: center;
 }
 
 .signupButton {

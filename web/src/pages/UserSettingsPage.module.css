@@ -9,6 +9,10 @@
   max-width: 450px;
 }
 
+.userSettingsForm input {
+  max-height: 22px;
+}
+
 .userSettingsForm select {
   width: 200px;
   justify-items: center;
