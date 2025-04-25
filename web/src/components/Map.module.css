@@ -12,13 +12,20 @@
   margin-bottom: 5px;
 }
 
+.addItemForm {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
 .addItemForm input {
-  width: 200px;
+  flex-grow: 1;
   margin-bottom: 5px;
 }
 
-.deleteBoxButton {
-  margin-left: 100px;
+.deleteBoxButtonContainer {
+  display: flex;
+  justify-content: center;
 }
 
 .search {
@@ -27,4 +34,5 @@
 
 .search input {
   width: 300px;
+  margin: 5px;
 }

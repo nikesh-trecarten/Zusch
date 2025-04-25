@@ -379,12 +379,14 @@ export function Map() {
                       />
                       <button type="submit">Add Item</button>
                     </form>
-                    <button
-                      className={styles.deleteBoxButton}
-                      onClick={() => handleDeleteBox(box)}
-                    >
-                      Delete Box
-                    </button>
+                    <div className={styles.deleteBoxButtonContainer}>
+                      <button
+                        className={styles.deleteBoxButton}
+                        onClick={() => handleDeleteBox(box)}
+                      >
+                        Delete Box
+                      </button>
+                    </div>
                   </>
                 )}
               </Popup>
