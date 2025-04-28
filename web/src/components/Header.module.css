@@ -29,15 +29,20 @@
   gap: 10px;
   align-items: baseline;
   justify-content: right;
+  @media (max-width: 374px) {
+    gap: 5px;
+  }
 }
 
 .clerkButton {
   color: white;
   height: 85.88px;
-  max-width: 50px;
   padding: 0 5px;
   margin: 0;
   align-content: center;
+  @media (max-width: 430px) {
+    max-width: 58.03px;
+  }
 }
 
 .clerkButton:hover {
