@@ -1,10 +1,11 @@
 import { StyleSheet, View, Text } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SettingsPage() {
   return (
-    <View>
+    <SafeAreaView style={{ flex: 1 }}>
       <Text>I am the settings page</Text>
-    </View>
+    </SafeAreaView>
   );
 }
 
