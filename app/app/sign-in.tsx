@@ -2,13 +2,38 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Pressable, Text, TextInput, StyleSheet, Alert } from "react-native";
 import { globalStyles } from "@/styles/globalStyles";
 import { useState } from "react";
+import { useSignIn } from "@clerk/clerk-expo";
+import { router } from "expo-router";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { signIn, setActive, isLoaded } = useSignIn();
+
+  const onSignInPress = async () => {
+    if (!isLoaded) return;
+
+    try {
+      const signInAttempt = await signIn.create({
+        identifier: email,
+        password,
+      });
+
+      if (signInAttempt.status === "complete") {
+        await setActive({ session: signInAttempt.createdSessionId });
+        router.replace("/");
+      } else {
+        console.error(JSON.stringify(signInAttempt, null, 2));
+      }
+    } catch (err) {
+      console.error(JSON.stringify(err, null, 2));
+    }
+  };
+
   return (
     <SafeAreaView style={[styles.container]}>
       <TextInput
+        autoCapitalize="none"
         value={email}
         onChangeText={(text) => {
           setEmail(text);
@@ -29,11 +54,7 @@ export default function SignInPage() {
         style={({ pressed }) => {
           return [globalStyles.button, pressed && globalStyles.buttonPressed];
         }}
-        onPress={() => {
-          Alert.alert(`${email} ${password}`);
-          setEmail("");
-          setPassword("");
-        }}
+        onPress={onSignInPress}
       >
         <Text style={[globalStyles.buttonText]}>Sign In</Text>
       </Pressable>
