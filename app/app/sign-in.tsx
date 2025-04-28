@@ -1,17 +1,39 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Pressable, Text, TextInput, StyleSheet } from "react-native";
+import { Pressable, Text, TextInput, StyleSheet, Alert } from "react-native";
 import { globalStyles } from "@/styles/globalStyles";
+import { useState } from "react";
 
 export default function SignInPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   return (
     <SafeAreaView style={[styles.container]}>
-      <TextInput style={[styles.input]} />
-      <TextInput style={[styles.input]} />
+      <TextInput
+        value={email}
+        onChangeText={(text) => {
+          setEmail(text);
+        }}
+        placeholder="Email"
+        style={[styles.input]}
+      />
+      <TextInput
+        value={password}
+        onChangeText={(text) => {
+          setPassword(text);
+        }}
+        secureTextEntry
+        placeholder="Password"
+        style={[styles.input]}
+      />
       <Pressable
         style={({ pressed }) => {
           return [globalStyles.button, pressed && globalStyles.buttonPressed];
         }}
-        onPress={() => {}}
+        onPress={() => {
+          Alert.alert(`${email} ${password}`);
+          setEmail("");
+          setPassword("");
+        }}
       >
         <Text style={[globalStyles.buttonText]}>Sign In</Text>
       </Pressable>
