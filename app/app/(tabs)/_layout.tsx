@@ -1,10 +1,15 @@
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import React from "react";
 import { COLORS } from "@/styles/constants";
+import { useUser } from "@clerk/clerk-expo";
 
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 export default function TabLayout() {
+  const { isSignedIn } = useUser();
+  if (!isSignedIn) {
+    return <Redirect href="/sign-in" />;
+  }
   return (
     <Tabs
       screenOptions={{
