@@ -16,6 +16,9 @@ export const globalStyles = StyleSheet.create({
     alignItems: "center",
     color: "#fff",
   },
+  buttonPressed: {
+    backgroundColor: COLORS.secondary,
+  },
   buttonText: {
     color: "#fff",
     fontSize: 16,

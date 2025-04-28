@@ -8,9 +8,11 @@ export default function HomeScreen() {
       <SafeAreaView style={[styles.container]}>
         <Text style={[globalStyles.heading]}>I am the homepage</Text>
         <Pressable
-          style={[globalStyles.button]}
+          style={({ pressed }) => {
+            return [globalStyles.button, pressed && globalStyles.buttonPressed];
+          }}
           onPress={() => {
-            Alert.alert("Button Pressed");
+            console.log("Button Pressed");
           }}
         >
           <Text style={[globalStyles.buttonText]}>I am a button</Text>
