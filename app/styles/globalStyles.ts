@@ -9,4 +9,15 @@ export const globalStyles = StyleSheet.create({
     marginBottom: 16,
     textAlign: "center",
   },
+  button: {
+    backgroundColor: COLORS.primary,
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    color: "#fff",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
 });
