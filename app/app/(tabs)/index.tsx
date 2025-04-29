@@ -1,11 +1,11 @@
-import { StyleSheet, View, Text, Button, Pressable, Alert } from "react-native";
+import { Text, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { globalStyles } from "@/styles/globalStyles";
 
 export default function HomeScreen() {
   return (
     <>
-      <SafeAreaView style={[styles.container]}>
+      <SafeAreaView style={[globalStyles.pageContainer]}>
         <Text style={[globalStyles.heading]}>I am the homepage</Text>
         <Pressable
           style={({ pressed }) => {
@@ -21,10 +21,3 @@ export default function HomeScreen() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-});

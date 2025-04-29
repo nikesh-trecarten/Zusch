@@ -2,6 +2,10 @@ import { StyleSheet } from "react-native";
 import { COLORS } from "./constants";
 
 export const globalStyles = StyleSheet.create({
+  pageContainer: {
+    flex: 1,
+    padding: 20,
+  },
   heading: {
     color: COLORS.primary,
     fontSize: 24,

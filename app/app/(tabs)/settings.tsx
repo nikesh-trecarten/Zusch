@@ -1,23 +1,25 @@
-import { StyleSheet, View, Text } from "react-native";
+import { Text, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { globalStyles } from "@/styles/globalStyles";
+import { useAuth } from "@clerk/clerk-expo";
 
-export default function SettingsPage() {
+export default function SettingsScreen() {
+  const { signOut } = useAuth();
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <Text>I am the settings page</Text>
-    </SafeAreaView>
+    <>
+      <SafeAreaView style={[globalStyles.pageContainer]}>
+        <Text style={[globalStyles.heading]}>I am the settings page</Text>
+        <Pressable
+          style={({ pressed }) => {
+            return [globalStyles.button, pressed && globalStyles.buttonPressed];
+          }}
+          onPress={() => {
+            signOut();
+          }}
+        >
+          <Text style={[globalStyles.buttonText]}>Logout</Text>
+        </Pressable>
+      </SafeAreaView>
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  headerImage: {
-    color: "#808080",
-    bottom: -90,
-    left: -35,
-    position: "absolute",
-  },
-  titleContainer: {
-    flexDirection: "row",
-    gap: 8,
-  },
-});

@@ -6,7 +6,12 @@ import { useUser } from "@clerk/clerk-expo";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 export default function TabLayout() {
-  const { isSignedIn } = useUser();
+  const { isSignedIn, isLoaded } = useUser();
+
+  if (!isLoaded) {
+    return null;
+  }
+
   if (!isSignedIn) {
     return <Redirect href="/sign-in" />;
   }
