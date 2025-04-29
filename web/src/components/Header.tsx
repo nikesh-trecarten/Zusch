@@ -37,7 +37,7 @@ export function Header() {
             <Link to="/settings">
               <img
                 className={styles.cornerButton}
-                src="home-button.png"
+                src="gear.png"
                 alt="user settings link"
               />
             </Link>

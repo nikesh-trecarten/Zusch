@@ -35,7 +35,6 @@
 }
 
 .clerkButton {
-  color: white;
   height: 85.88px;
   padding: 0 5px;
   margin: 0;
@@ -53,7 +52,6 @@
 .cornerButton {
   width: 28px;
   height: 28px;
-  background-color: white;
   border-radius: 50%;
   cursor: pointer;
 }
