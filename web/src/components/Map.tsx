@@ -71,7 +71,7 @@ export function Map() {
           setMapCenter([parseFloat(lat), parseFloat(lon)]);
         } else {
           console.warn(
-            "No geocode data for this address, using default map center."
+            "No geocode data for this address, please check your address in the settings page."
           );
         }
       } catch (error) {
