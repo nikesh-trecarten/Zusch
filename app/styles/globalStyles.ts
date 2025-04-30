@@ -5,23 +5,24 @@ export const globalStyles = StyleSheet.create({
   pageContainer: {
     flex: 1,
     padding: 20,
+    backgroundColor: "#e3efde",
   },
   heading: {
-    color: COLORS.primary,
+    color: COLORS.text,
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 16,
     textAlign: "center",
   },
   button: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.secondary,
     padding: 10,
     borderRadius: 5,
     alignItems: "center",
     color: "#fff",
   },
   buttonPressed: {
-    backgroundColor: COLORS.secondary,
+    backgroundColor: COLORS.primary,
   },
   buttonText: {
     color: "#fff",
