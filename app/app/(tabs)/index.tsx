@@ -5,6 +5,7 @@ import { useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/clerk-expo";
 import axios from "axios";
 import { useFocusEffect } from "expo-router";
+import { Header } from "@/components/Header";
 
 const API_HOST = process.env.EXPO_PUBLIC_API_HOST;
 
@@ -55,6 +56,7 @@ export default function HomeScreen() {
   return (
     <>
       <SafeAreaView style={[globalStyles.pageContainer]}>
+        <Header />
         <Text style={[globalStyles.heading]}>I am the homepage</Text>
         <Pressable
           style={({ pressed }) => {
