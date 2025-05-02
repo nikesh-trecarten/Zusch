@@ -47,5 +47,5 @@ INSERT INTO items (box_id, item_name) VALUES
 (2, 'tennis balls'),
 (3, 'Nintendo 64'),
 (3, 'grey controller'),
-(3, 'red controller');
+(3, 'red controller'),
 (3, 'blue controller');
