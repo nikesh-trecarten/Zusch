@@ -40,12 +40,12 @@ INSERT INTO boxes (user_id, location) VALUES -- enter longitude before latitude
 ('test_user_id3', ST_GeographyFromText('SRID=4326;POINT(7.090492 50.732749)'));
 
 INSERT INTO items (box_id, item_name) VALUES
-(1, 'test_box1_test_item1'),
-(1, 'test_box1_test_item2'),
-(1, 'test_box1_test_item3'),
-(2, 'test_box2_test_item1'),
-(2, 'test_box2_test_item2'),
-(2, 'test_box2_test_item3'),
-(3, 'test_box3_test_item1'),
-(3, 'test_box3_test_item2'),
-(3, 'test_box3_test_item3');
+(1, 'lamp'),
+(1, 'CDs'),
+(1, 'CD player'),
+(2, 'tennis racket'),
+(2, 'tennis balls'),
+(3, 'Nintendo 64'),
+(3, 'grey controller'),
+(3, 'red controller');
+(3, 'blue controller');
