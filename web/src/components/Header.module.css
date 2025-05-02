@@ -39,6 +39,7 @@
   padding: 0 5px;
   margin: 0;
   align-content: center;
+  color: white;
   @media (max-width: 430px) {
     max-width: 58.03px;
   }
