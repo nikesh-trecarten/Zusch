@@ -280,8 +280,8 @@ export function Map() {
         Loading Map... <br />
         By the time you finish reading this, you should see the map. If you are
         still reading this message, it means we are having trouble getting your
-        location. If you can still read this, please click on the blue house
-        icon in the top right corner to go to reset your address.
+        location. If you can still read this, please reset your address in the
+        settings page.
       </div>
     );
   }
